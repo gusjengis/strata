@@ -693,7 +693,8 @@ pub(super) fn build_appearance_menu(
     let popover_weak = popover.downgrade();
     append_menu_heading(&content, &crate::i18n::tr("VIEW"));
     let current_mode = view.view_mode();
-    let button_icon = crate::assets::chrome_icon(browser_mode_icon(current_mode));
+    // A fixed "more" glyph: the view switches beside it already show the mode.
+    let button_icon = crate::assets::chrome_icon(crate::assets::icons::ELLIPSIS);
     let (columns, columns_check, _) = appearance_option(
         crate::assets::icons::COLUMNS,
         "Columns",
@@ -820,7 +821,6 @@ pub(super) fn build_appearance_menu(
         let group_by_type = group_by_type.clone();
         let column_sizes = column_sizes.clone();
         let customize_columns = customize_columns.clone();
-        let button_icon = button_icon.clone();
         view.connect_view_mode_changed(move |mode| {
             columns_check.set_visible(mode == BrowserMode::Columns);
             icons_check.set_visible(mode == BrowserMode::Icons);
@@ -828,7 +828,6 @@ pub(super) fn build_appearance_menu(
             group_by_type.set_sensitive(mode.supports_type_grouping());
             column_sizes.set_visible(mode == BrowserMode::Columns);
             customize_columns.set_visible(mode == BrowserMode::List);
-            crate::assets::set_primary_icon(&button_icon, browser_mode_icon(mode));
         });
     }
     content.append(&columns);
@@ -1038,14 +1037,6 @@ pub(super) fn build_appearance_menu(
     button.add_css_class("header-action");
     button.set_cursor_from_name(Some("pointer"));
     button
-}
-
-fn browser_mode_icon(mode: BrowserMode) -> &'static str {
-    match mode {
-        BrowserMode::Columns => crate::assets::icons::COLUMNS,
-        BrowserMode::Icons => crate::assets::icons::ICONS,
-        BrowserMode::List => crate::assets::icons::LIST,
-    }
 }
 
 fn appearance_option(

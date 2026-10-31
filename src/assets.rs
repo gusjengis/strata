@@ -38,6 +38,7 @@ pub mod icons {
     pub const CORNER_DOWN_LEFT: &str = "strata-corner-down-left";
     pub const DISC: &str = "strata-disc";
     pub const DOCUMENTS: &str = "strata-file-text";
+    pub const ELLIPSIS: &str = "strata-ellipsis";
     pub const DOWNLOADS: &str = "strata-download";
     pub const EJECT: &str = "strata-eject";
     pub const EYE: &str = "strata-eye";

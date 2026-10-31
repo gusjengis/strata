@@ -148,9 +148,14 @@ impl Header {
         footer_cap.set_hexpand(false);
         let navigation = history_capsule(browser);
         let views = view_switcher(browser, preferences);
+        let appearance_divider = gtk::Separator::new(gtk::Orientation::Vertical);
+        appearance_divider.add_css_class("capsule-divider");
+        views.append(&appearance_divider);
+        views.append(&appearance);
         let actions = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         actions.add_css_class("header-actions");
         actions.add_css_class("toolbar-capsule");
+        actions.set_valign(gtk::Align::Center);
         let new_tab = header_action(icons::PLUS, "");
         crate::ui::shortcut_reference::follow_tooltip(
             &new_tab,
@@ -160,10 +165,6 @@ impl Header {
         crate::ui::accessibility::set_label(&new_tab, &crate::i18n::tr("New tab"));
         actions.append(&new_tab);
         actions.append(&settings);
-        let appearance_capsule = gtk::Box::new(gtk::Orientation::Horizontal, 0);
-        appearance_capsule.add_css_class("toolbar-capsule");
-        appearance_capsule.add_css_class("appearance-capsule");
-        appearance_capsule.append(&appearance);
         let content = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         content.set_hexpand(true);
         content.set_valign(gtk::Align::Center);
@@ -173,7 +174,6 @@ impl Header {
         toolbar.append(&navigation);
         toolbar.append(&location);
         toolbar.append(&views);
-        toolbar.append(&appearance_capsule);
         toolbar.append(&actions);
         toolbar.append(&search);
         content.append(&sidebar_cap);
