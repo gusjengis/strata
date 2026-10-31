@@ -377,15 +377,11 @@ fn wait_for_viewport(fixture: &KeyboardFixture) -> Option<gtk::Adjustment> {
 }
 
 fn history_button(fixture: &KeyboardFixture, index: usize) -> Result<gtk::Button, String> {
+    let class = if index == 0 { "history-back" } else { "history-forward" };
     mapped_button(fixture.window.upcast_ref(), &|button| {
-        button.has_css_class("list-navigation-button")
-            && button
-                .parent()
-                .is_some_and(|parent| parent.has_css_class("list-navigation"))
-            && std::iter::successors(button.prev_sibling(), |widget| widget.prev_sibling()).count()
-                == index
+        button.has_css_class(class)
     })
-    .ok_or_else(|| format!("setup: no history button {index} in the pane header"))
+    .ok_or_else(|| format!("setup: no history button {index} in the toolbar"))
 }
 
 fn settled_value(adjustment: &gtk::Adjustment) -> f64 {
@@ -473,8 +469,8 @@ fn leaving_or_reloading_while_a_return_settles_keeps_its_viewport() {
 }
 
 /// How the return to the parent starts. Alt+Up in the listing, Alt+Up or Alt+Left in
-/// its Ctrl+F field, and a breadcrumb click focus the restored listing; the pane
-/// header's Back button keeps focus.
+/// its Ctrl+F field, and a breadcrumb click focus the restored listing; the
+/// toolbar's Back button keeps focus.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Return {
     AltUp,
@@ -557,14 +553,7 @@ fn icons_return_case(
                 .unwrap_or_default()
                 .to_owned();
             let button = mapped_button(fixture.window.upcast_ref(), &|button| match route {
-                // Back leads the pane header's history buttons.
-                Return::BackButton => {
-                    button.has_css_class("list-navigation-button")
-                        && button.prev_sibling().is_none()
-                        && button
-                            .parent()
-                            .is_some_and(|parent| parent.has_css_class("list-navigation"))
-                }
+                Return::BackButton => button.has_css_class("history-back"),
                 _ => {
                     button.has_css_class("breadcrumb") && button.label().as_deref() == Some(&parent)
                 }
@@ -604,8 +593,10 @@ fn icons_return_case(
             if {
                 // Focus that must stay put has no settle condition.
                 pump(300);
-                !focus(&fixture)
-                    .is_some_and(|focused| focused.has_css_class("list-navigation-button"))
+                // Back disables at the start of history, which drops its focus.
+                focus(&fixture).is_some_and(|focused| {
+                    focused.is_ancestor(&fixture.view.widget())
+                })
             } =>
         {
             failures.push(format!(

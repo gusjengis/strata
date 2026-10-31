@@ -241,7 +241,7 @@ fn traffic_light(kind: &str, icon: &str, label: &str) -> gtk::Button {
     button
 }
 
-fn history_capsule(view: &BrowserView) -> gtk::Box {
+pub(in crate::ui::window) fn history_capsule(view: &BrowserView) -> gtk::Box {
     use crate::ui::keys::{
         Keys,
         bindings::{HISTORY_BACK, HISTORY_FORWARD},

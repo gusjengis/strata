@@ -19,6 +19,8 @@ mod tabs;
 mod tenxer_splash;
 
 pub(super) use tabs::{TabWindow, is_tab_shortcut, tab_index};
+#[cfg(test)]
+pub(in crate::ui::window) use layout::history_capsule;
 
 pub(super) struct WindowContent {
     pub(super) browser: BrowserView,

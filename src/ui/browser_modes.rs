@@ -3879,6 +3879,9 @@ fn list_navigation(browser: &Rc<Browser>) -> gtk::Box {
         });
         actions.append(&button);
     }
+    // The Finder toolbar owns back and forward, and Finder has no Up button;
+    // the breadcrumbs and the parent-folder shortcut cover it.
+    actions.set_visible(false);
     actions
 }
 

@@ -106,6 +106,7 @@ impl KeyboardFixture {
         let header = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         let toggle = gtk::ToggleButton::builder().active(true).build();
         header.append(&toggle);
+        header.append(&composition::history_capsule(&view));
         header.append(&view.location_widget());
         let top_bar = TopBarNavigation::new(&header, &sidebar.widget, &toggle);
         let preview = PreviewDrawer::new(provider, false);
