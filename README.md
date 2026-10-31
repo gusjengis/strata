@@ -93,10 +93,20 @@ inputs.strata.url = "github:lgse/strata";
 ```
 
 Pass `inputs` through `extraSpecialArgs` (Home Manager) or `specialArgs` (NixOS).
-Update the flake input and rebuild to upgrade. Non-free UnRAR support is omitted
-by default; enable it with `pkgs.callPackage ./package.nix { rarSupport = true; }`
-and a package set allowing unfree software. On NixOS, enable `services.gvfs.enable`
+Update the flake input and rebuild to upgrade. On NixOS, enable `services.gvfs.enable`
 for network shares and `services.udisks2.enable` for disk management.
+
+Non-free UnRAR support is omitted by default. Enable it from a package set that
+allows unfree software, such as one with `nixpkgs.config.allowUnfree = true;`:
+
+```nix
+pkgs.callPackage "${inputs.strata}/package.nix" { rarSupport = true; }
+```
+
+The integrations that Strata installs from Settings or the command line (the
+file chooser portal, the default file manager service, and the udiskie unlock
+hook) are not supported on Nix yet. They would record the store path of the
+current build, which the next update or garbage collection invalidates.
 
 ### Interactive installation
 
