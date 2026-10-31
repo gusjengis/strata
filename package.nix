@@ -22,6 +22,7 @@
   xdg-utils,
   adwaita-icon-theme,
   rarSupport ? false,
+  buildCommit ? null,
 }:
 let
   manifest = builtins.fromTOML (builtins.readFile ./Cargo.toml);
@@ -74,6 +75,7 @@ rustPlatform.buildRustPackage {
     gst_all_1.gst-libav
   ];
 
+  STRATA_BUILD_COMMIT = buildCommit;
   STRATA_SANDBOX_ROOT = "/nix/store";
   STRATA_UPDATER = "disabled";
   STRATA_TRUSTED_COMMAND_PATH = lib.makeBinPath (
@@ -86,18 +88,6 @@ rustPlatform.buildRustPackage {
   STRATA_SANDBOX_PATH = lib.makeBinPath helpers;
   STRATA_SANDBOX_PRLIMIT = "${lib.getBin util-linux}/bin/prlimit";
   STRATA_SANDBOX_GDK_PIXBUF_MODULE_FILE = "${librsvg}/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache";
-
-  preFixup = ''
-    gappsWrapperArgs+=(--prefix PATH : ${
-      lib.makeBinPath (
-        helpers
-        ++ [
-          bubblewrap
-          xdg-utils
-        ]
-      )
-    })
-  '';
 
   postInstall = ''
     install -Dm644 data/io.github.lgse.Strata.desktop \

@@ -17,7 +17,9 @@
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          strata = pkgs.callPackage ./package.nix { };
+          strata = pkgs.callPackage ./package.nix {
+            buildCommit = self.shortRev or self.dirtyShortRev or null;
+          };
         in
         {
           inherit strata;
