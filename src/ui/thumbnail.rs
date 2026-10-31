@@ -1308,8 +1308,12 @@ pub(super) fn show_fallback_icon(image: &ThumbnailSlot, icon: &str, size: i32) {
 /// A metadata fill can find that a bound folder needs administrator access; a
 /// folder the user customized keeps its icon, as a fresh bind would.
 pub(super) fn show_locked_folder(image: &ThumbnailSlot) {
-    use crate::assets::icons::{FOLDER, FOLDER_LOCK};
-    if image.fallback_icon().as_deref() != Some(FOLDER) {
+    use crate::assets::icons::FOLDER_LOCK;
+    if !image
+        .fallback_icon()
+        .as_deref()
+        .is_some_and(crate::assets::is_folder_icon)
+    {
         return;
     }
     let customized = TRACKED_CUSTOMIZED_ICONS.with_borrow_mut(|icons| {
@@ -1471,7 +1475,7 @@ fn path_icon_texture(
     let custom_icon = preference_manager.custom_icon(path);
     let color = preference_manager.folder_color(path);
     let customized = custom_icon.is_some() || color.is_some();
-    let texture = if fallback_icon == crate::assets::icons::FOLDER
+    let texture = if crate::assets::is_folder_icon(fallback_icon)
         && let Some(decoration) = custom_icon.as_deref()
     {
         let color = color
@@ -1537,7 +1541,7 @@ fn apply_path_customization_image(
     let color = preference_manager.folder_color(path);
     let customized = custom_icon.is_some() || color.is_some();
 
-    if (matches!(kind, ImageIconKind::Folder) || default_icon == crate::assets::icons::FOLDER)
+    if (matches!(kind, ImageIconKind::Folder) || crate::assets::is_folder_icon(default_icon))
         && let Some(decoration) = custom_icon.as_deref()
     {
         let color = color

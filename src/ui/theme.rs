@@ -754,6 +754,9 @@ impl ThemeManager {
         crate::assets::set_catppuccin_theme_colors(
             self.preferences.file_icon_colors() == FileIconColors::Theme,
         );
+        crate::assets::native::set_enabled(
+            self.preferences.file_icon_colors() == FileIconColors::Native,
+        );
         // SVG strokes accept fewer color forms than GTK does.
         crate::assets::set_primary_icon_color(&color_to_hex(&tokens.accent));
         crate::assets::set_text_icon_color(&color_to_hex(&tokens.text));

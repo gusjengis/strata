@@ -675,7 +675,7 @@ fn result_row(state: &Rc<SearchState>, item: &SearchItem) -> gtk::ListBoxRow {
     let icon = super::thumbnail::ThumbnailSlot::new(19);
     icon.add_css_class("search-result-thumbnail");
     let fallback = if item.is_directory {
-        crate::assets::icons::FOLDER
+        crate::ui::browser::folder_icon()
     } else {
         crate::ui::browser::icon_for_name(&item.name)
     };
@@ -794,7 +794,7 @@ fn refresh_visible_thumbnails(state: &SearchState) {
                 continue;
             };
             let fallback = if item.is_directory {
-                crate::assets::icons::FOLDER
+                crate::ui::browser::folder_icon()
             } else {
                 crate::ui::browser::icon_for_name(&item.name)
             };

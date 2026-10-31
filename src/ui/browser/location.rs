@@ -2695,7 +2695,7 @@ impl ViewState {
             } else if crumb.uri_value().is_some() {
                 crate::assets::icons::NETWORK
             } else {
-                crate::assets::icons::FOLDER
+                crate::ui::browser::folder_icon()
             };
 
             let icon = crate::assets::primary_icon(icon_name, 16);

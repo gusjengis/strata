@@ -11,6 +11,7 @@ use std::{
 
 use gtk::{gdk, gio, glib, prelude::*};
 
+pub mod native;
 mod vector;
 
 pub mod icons {
@@ -282,6 +283,20 @@ pub fn prepare() -> Result<(), Box<dyn std::error::Error>> {
     register_application_fonts([regular])?;
 
     Ok(())
+}
+
+/// Whether `name` draws a plain folder, in either icon style.
+pub fn is_folder_icon(name: &str) -> bool {
+    name == icons::FOLDER || native::folder_icon() == Some(name)
+}
+
+fn texture_scale(texture_px: i32, logical_px: i32) -> i32 {
+    if logical_px > 0 && texture_px > logical_px {
+        // Oversampled glyph sizes imply HiDPI or a later zoom; two is enough.
+        (texture_px / logical_px).clamp(1, 2)
+    } else {
+        1
+    }
 }
 
 pub fn register_icon_theme() {
@@ -573,6 +588,12 @@ fn primary_icon_texture_at(
     logical_px: i32,
     context: IconContext,
 ) -> Option<gdk::Texture> {
+    if native::is_native(name) {
+        // Theme artwork is drawn at its own size rather than the oversampled
+        // glyph size; downscaling bitmaps that far would soften them.
+        let _ = (texture_px, color, context);
+        return native::texture(name, logical_px, texture_scale(texture_px, logical_px));
+    }
     if name.starts_with(CATPPUCCIN_ICON_PREFIX) {
         return catppuccin_icon_texture_at(name, color, texture_px, logical_px, context);
     }

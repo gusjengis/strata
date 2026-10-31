@@ -101,9 +101,27 @@ pub(in crate::ui) fn entry_icon(entry: &FileEntry) -> &'static str {
         return crate::assets::icons::FOLDER_LOCK;
     }
     if entry.is_directory() {
-        return crate::assets::icons::FOLDER;
+        return entry
+            .location
+            .native_path()
+            .and_then(crate::assets::native::special_folder_icon)
+            .unwrap_or_else(folder_icon);
     }
     icon_for_name(&entry.display_name)
+}
+
+/// The plain folder icon in the active icon style.
+pub(in crate::ui) fn folder_icon() -> &'static str {
+    crate::assets::native::folder_icon().unwrap_or(crate::assets::icons::FOLDER)
+}
+
+/// Strata's glyphs dim files beneath folders; full-color artwork stays opaque.
+pub(in crate::ui) fn entry_icon_opacity(is_directory: bool) -> f64 {
+    if is_directory || crate::assets::native::enabled() {
+        1.0
+    } else {
+        0.72
+    }
 }
 
 /// `query` must already be folded through `fold_for_search` by the caller.
@@ -190,6 +208,9 @@ fn affix_pattern_icon(name: &str) -> Option<&'static str> {
 }
 
 pub(in crate::ui) fn icon_for_name(name: &str) -> &'static str {
+    if let Some(icon) = crate::assets::native::file_icon(name) {
+        return icon;
+    }
     let lowered = name.to_ascii_lowercase();
     if let Some(icon) = exact_filename_icon(&lowered) {
         return icon;

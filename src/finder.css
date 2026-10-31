@@ -1,8 +1,9 @@
 /* Finder skin: macOS 27 Finder, dark appearance, measured at 3840x2160 scale 1.
-   The window is translucent; the compositor blurs what lies behind it. */
+   The window body is opaque. Colors are Finder's over a mid-gray wallpaper;
+   the sidebar is a glass panel lit slightly at its edges. */
 
-@define-color finder_content rgba(30, 30, 31, 0.93);
-@define-color finder_sidebar rgba(33, 36, 44, 0.80);
+@define-color finder_content #282828;
+@define-color finder_sidebar #2c2d2e;
 @define-color finder_bar rgba(255, 255, 255, 0.035);
 @define-color finder_selection #0059d1;
 @define-color finder_selection_inactive #464646;
@@ -18,7 +19,7 @@ window.background,
 window.csd,
 window {
   font-weight: 500;
-  background: transparent;
+  background: @finder_content;
   box-shadow: inset 0 0 0 1px alpha(white, 0.10);
 }
 
@@ -42,6 +43,35 @@ window {
 .sidebar-cap.over-sidebar {
   background: @finder_sidebar;
   border: none;
+}
+
+/* Glass edge light: brighter toward the window edges, fading inward. */
+.sidebar-shell {
+  box-shadow:
+    inset 1px 0 alpha(white, 0.16),
+    inset 0 -1px alpha(white, 0.08),
+    inset 24px 0 40px -24px alpha(white, 0.10),
+    inset 0 -24px 40px -24px alpha(white, 0.08);
+}
+
+.sidebar-cap.over-sidebar {
+  box-shadow:
+    inset 1px 0 alpha(white, 0.16),
+    inset 0 1px alpha(white, 0.10),
+    inset 24px 0 40px -24px alpha(white, 0.10),
+    inset 0 24px 40px -24px alpha(white, 0.10);
+}
+
+.footer-cap.over-sidebar {
+  box-shadow:
+    inset 1px 0 alpha(white, 0.16),
+    inset 0 -1px alpha(white, 0.08),
+    inset 24px 0 40px -24px alpha(white, 0.10);
+}
+
+/* The panel's inner edge against the body. */
+.sidebar-split > separator.wide {
+  background: alpha(black, 0.35);
 }
 
 .finder-header-row {
@@ -379,7 +409,8 @@ window:backdrop .file-list-mode row:selected {
 
 /* Status bar */
 .shortcut-footer {
-  background-image: linear-gradient(@finder_bar, @finder_bar);
+  background-color: #303030;
+  background-image: none;
   border-top: 1px solid alpha(white, 0.10);
   color: @finder_secondary;
   font-size: 11px;
@@ -526,8 +557,12 @@ window:backdrop .file-icons > child:selected .icons-card-label,
 }
 
 .preview-metadata {
+  margin-top: 1px;
+}
+
+.preview-metadata label {
   color: @finder_secondary;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 /* Menus and popovers: dark Liquid Glass platters. */

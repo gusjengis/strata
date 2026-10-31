@@ -73,6 +73,8 @@ pub(crate) enum FileIconColors {
     #[default]
     Brand,
     Theme,
+    /// Full-color artwork from the desktop icon theme.
+    Native,
 }
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]

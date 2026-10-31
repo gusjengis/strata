@@ -309,13 +309,15 @@ fn append_file_icon_colors_option(content: &gtk::Box, preferences: &Rc<Preferenc
         &[
             ("Brand colors", FileIconColors::Brand),
             ("Theme colors", FileIconColors::Theme),
+            ("Icon theme", FileIconColors::Native),
         ],
         PreferenceManager::file_icon_colors,
         PreferenceManager::set_file_icon_colors,
     );
     group.append(&super::control_row(
         "File icon colors",
-        "Brand colors use each file type's own palette; theme colors use the accent.",
+        "Brand colors use each file type's own palette; theme colors use the accent; \
+         icon theme uses the desktop's full-color artwork in newly shown folders.",
         &choice,
     ));
     let (row, toggle) = super::settings_option(

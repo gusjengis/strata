@@ -5990,7 +5990,7 @@ fn apply_icons_entry(
     );
     if scrolling {
         icon.set_hidden(entry.is_hidden);
-        icon.set_base_opacity(if entry.is_directory() { 1.0 } else { 0.72 });
+        icon.set_base_opacity(super::browser::entry_icon_opacity(entry.is_directory()));
         label.set_opacity(if entry.is_hidden { 0.65 } else { 1.0 });
         if let Some(details) = super::icons_cell::details_label(card) {
             details.set_opacity(if entry.is_hidden { 0.65 } else { 1.0 });
@@ -6018,7 +6018,7 @@ fn refresh_icons_card_chrome(
     }
     set_mode_mark_style(card, mark_in(marks, &entry.location));
     icon.set_hidden(entry.is_hidden);
-    icon.set_base_opacity(if entry.is_directory() { 1.0 } else { 0.72 });
+    icon.set_base_opacity(super::browser::entry_icon_opacity(entry.is_directory()));
     label.set_opacity(if entry.is_hidden { 0.65 } else { 1.0 });
     if let Some(details) = super::icons_cell::details_label(card) {
         details.set_opacity(if entry.is_hidden { 0.65 } else { 1.0 });

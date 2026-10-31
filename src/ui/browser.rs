@@ -98,7 +98,8 @@ pub(super) use crate::ui::browser::desktop::{launch_terminal, open_location_at};
 #[cfg(test)]
 pub(in crate::ui) use crate::ui::browser::entry::catppuccin;
 pub(super) use crate::ui::browser::entry::{
-    FOLDER_TYPE_GROUP, OTHER_TYPE_GROUP, entry_filter, entry_icon, entry_model_value,
+    FOLDER_TYPE_GROUP, OTHER_TYPE_GROUP, entry_filter, entry_icon, entry_icon_opacity, entry_model_value,
+    folder_icon,
     format_file_size, icon_for_name, metadata_needs_fill, model_type_group,
 };
 pub(crate) use crate::ui::browser::file_commands::{

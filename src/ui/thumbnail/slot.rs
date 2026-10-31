@@ -315,11 +315,8 @@ impl ThumbnailSlot {
             return;
         }
         self.imp().texture.replace(None);
-        let folder = [
-            crate::assets::icons::FOLDER,
-            crate::assets::icons::FOLDER_LOCK,
-        ]
-        .contains(&icon);
+        let folder =
+            crate::assets::is_folder_icon(icon) || icon == crate::assets::icons::FOLDER_LOCK;
         let scale = if self.imp().limit_fallback_height.get() && !folder {
             texture.map_or(1.0, cached_folder_height_scale)
         } else {

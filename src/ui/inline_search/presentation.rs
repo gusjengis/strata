@@ -134,7 +134,7 @@ impl ResultWidgets {
             thumbnail::show_customized_icon(
                 &self.icon,
                 &result.path,
-                crate::assets::icons::FOLDER,
+                browser::folder_icon(),
                 size,
             );
         } else {

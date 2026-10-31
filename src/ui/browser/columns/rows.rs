@@ -16,7 +16,8 @@ use crate::ui::{
         },
         collection::{ViewMap, activate_recursive_search_result},
         entry::{
-            entry_icon, entry_responds_to_preview_click, metadata_needs_fill, model_display_name,
+            entry_icon, entry_icon_opacity, entry_responds_to_preview_click, metadata_needs_fill,
+            model_display_name,
         },
         paths::is_trash_location,
     },
@@ -1054,7 +1055,7 @@ pub(super) fn column_rows(
                 crate::ui::thumbnail::show_fallback_icon(&icon, entry_icon(entry), 17);
             }
             icon.set_hidden(entry.is_hidden);
-            icon.set_base_opacity(if entry.is_directory() { 1.0 } else { 0.72 });
+            icon.set_base_opacity(entry_icon_opacity(entry.is_directory()));
             chevron.set_visible(entry.is_directory());
             if mode_active
                 && !scrolling_for_bind.get()
