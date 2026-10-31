@@ -47,6 +47,7 @@ rustPlatform.buildRustPackage {
       ./build.rs
       ./src
       ./data
+      ./integrations
       ./LICENSE
       ./THIRD_PARTY_LICENSES.md
     ];
@@ -74,16 +75,17 @@ rustPlatform.buildRustPackage {
   ];
 
   STRATA_SANDBOX_ROOT = "/nix/store";
+  STRATA_UPDATER = "disabled";
+  STRATA_TRUSTED_COMMAND_PATH = lib.makeBinPath (
+    helpers
+    ++ [
+      bubblewrap
+      xdg-utils
+    ]
+  );
   STRATA_SANDBOX_PATH = lib.makeBinPath helpers;
   STRATA_SANDBOX_PRLIMIT = "${lib.getBin util-linux}/bin/prlimit";
   STRATA_SANDBOX_GDK_PIXBUF_MODULE_FILE = "${librsvg}/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache";
-
-  postPatch = ''
-    # Preserve system-wrapper precedence without trusting the user's PATH.
-    substituteInPlace src/trusted_command.rs \
-      --replace-fail '"/run/wrappers/bin",' \
-        '"/run/wrappers/bin", "${lib.getBin bubblewrap}/bin",'
-  '';
 
   preFixup = ''
     gappsWrapperArgs+=(--prefix PATH : ${

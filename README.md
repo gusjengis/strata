@@ -71,26 +71,17 @@ Arch Linux and Omarchy are the primary supported environments. Current binaries 
 
 ### Nix and NixOS
 
-This fork provides a source-built flake package for `x86_64-linux` and
-`aarch64-linux`. Try it without installing, or add it to your profile:
+Build from source with Nix on `x86_64-linux` or `aarch64-linux`:
 
 ```bash
-nix run github:gusjengis/strata/build/1-nix-packaging
-nix profile add github:gusjengis/strata/build/1-nix-packaging
+nix run github:lgse/strata
+nix profile add github:lgse/strata
 ```
 
-The default Nix build omits non-free UnRAR support so it works without enabling
-unfree packages. Other archive formats remain available. To include UnRAR, use
-your own package set with `nixpkgs.config.allowUnfree = true` and override:
+For NixOS or Home Manager, add a flake input:
 
 ```nix
-strata = pkgs.callPackage /path/to/strata/package.nix { rarSupport = true; };
-```
-
-For a NixOS or Home Manager flake, add the input and use its package:
-
-```nix
-inputs.strata.url = "github:gusjengis/strata/build/1-nix-packaging";
+inputs.strata.url = "github:lgse/strata";
 ```
 
 ```nix
@@ -102,21 +93,10 @@ inputs.strata.url = "github:gusjengis/strata/build/1-nix-packaging";
 ```
 
 Pass `inputs` through `extraSpecialArgs` (Home Manager) or `specialArgs` (NixOS).
-You can also use `pkgs.callPackage /path/to/strata/package.nix { }` to build with
-your own package set and its license policy. Update the flake input and rebuild
-to upgrade; in-app binary replacement is disabled for Nix-managed installations.
-
-The package includes a desktop launcher and preview/media dependencies. It does
-not change your default file manager or install a file chooser portal. On NixOS,
-enable `services.gvfs.enable = true;` for network shares and removable-device
-discovery, and `services.udisks2.enable = true;` for disk management. Other Linux
-hosts need equivalent system services. Preview sandboxes require working
-Bubblewrap/user namespaces; isolation is never disabled as a fallback.
-
-Nix packaging currently has build validation, not parity with upstream's full
-container Rust/E2E regression suites. The package's `checks` output builds the
-application; it does not run those suites. `aarch64-linux` is exposed but still
-requires native build and runtime validation.
+Update the flake input and rebuild to upgrade. Non-free UnRAR support is omitted
+by default; enable it with `pkgs.callPackage ./package.nix { rarSupport = true; }`
+and a package set allowing unfree software. On NixOS, enable `services.gvfs.enable`
+for network shares and `services.udisks2.enable` for disk management.
 
 ### Interactive installation
 
