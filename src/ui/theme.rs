@@ -34,8 +34,11 @@ const RESET_CSS: &str = "* { all: unset; }";
 /// Above the static stylesheet so generated density spacing wins over its presets.
 const DENSITY_STYLE_PRIORITY: u32 = STYLE_PRIORITY + 1;
 const TOKEN_STYLE_PRIORITY: u32 = DENSITY_STYLE_PRIORITY + 1;
+/// The Finder skin restates sizes the token provider generates.
+const SKIN_STYLE_PRIORITY: u32 = TOKEN_STYLE_PRIORITY + 1;
+const SKIN_CSS: &str = include_str!("../finder.css");
 /// Above the token and roundness styles so the uncomposited fallback wins over them.
-const UNCOMPOSITED_STYLE_PRIORITY: u32 = TOKEN_STYLE_PRIORITY + 1;
+const UNCOMPOSITED_STYLE_PRIORITY: u32 = SKIN_STYLE_PRIORITY + 1;
 /// Above every Strata stylesheet, so `~/.config/strata/style.css` has the final word.
 const USER_STYLE_PRIORITY: u32 = UNCOMPOSITED_STYLE_PRIORITY + 1;
 const USER_STYLE_FILE: &str = "style.css";
@@ -219,6 +222,7 @@ pub struct ThemeManager {
         )>,
     >,
     uncomposited_provider: gtk::CssProvider,
+    skin_provider: gtk::CssProvider,
     user_provider: gtk::CssProvider,
     base_roundness: Cell<Option<CornerRoundness>>,
     themes: RefCell<Vec<Theme>>,
@@ -290,6 +294,7 @@ impl ThemeManager {
             density_provider: gtk::CssProvider::new(),
             density: Cell::new(None),
             uncomposited_provider: gtk::CssProvider::new(),
+            skin_provider: gtk::CssProvider::new(),
             user_provider: gtk::CssProvider::new(),
             base_roundness: Cell::new(None),
             themes: RefCell::new(themes),
@@ -531,6 +536,12 @@ impl ThemeManager {
                 &display,
                 &self.provider,
                 TOKEN_STYLE_PRIORITY,
+            );
+            self.skin_provider.load_from_string(SKIN_CSS);
+            gtk::style_context_add_provider_for_display(
+                &display,
+                &self.skin_provider,
+                SKIN_STYLE_PRIORITY,
             );
             gtk::style_context_add_provider_for_display(
                 &display,

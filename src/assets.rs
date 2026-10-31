@@ -26,6 +26,7 @@ pub mod icons {
     pub const CIRCLE_CHECK: &str = "strata-circle-check";
     pub const CIRCLE_X: &str = "strata-circle-x";
     pub const CHECK_ON_PRIMARY: &str = "strata-check-on-primary";
+    pub const CHEVRON_LEFT: &str = "strata-chevron-left";
     pub const CHEVRON_RIGHT: &str = "strata-chevron-right";
     pub const CLOCK: &str = "strata-clock";
     pub const CLIPBOARD_PASTE: &str = "strata-clipboard-paste";
@@ -397,6 +398,13 @@ pub fn use_bundled_spin_icons(root: &impl IsA<gtk::Widget>) {
 }
 
 pub fn set_primary_icon(image: &gtk::Image, name: &str) {
+    // Toolbar glyphs are monochrome like the window's labels.
+    if image.has_css_class("chrome-icon") {
+        let color = TEXT_ICON_COLOR.with(|color| color.borrow().clone());
+        apply_primary_icon(image, name, &color);
+        TEXT_ICONS.with(|icons| register_icon(icons, image, name));
+        return;
+    }
     let color = PRIMARY_ICON_COLOR.with(|color| color.borrow().clone());
     apply_primary_icon(image, name, &color);
     PRIMARY_ICONS.with(|icons| {

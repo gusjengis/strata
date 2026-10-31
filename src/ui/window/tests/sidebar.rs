@@ -342,7 +342,7 @@ fn an_empty_pinned_section_shows_only_while_files_are_dragged_over_the_sidebar()
             let sidebar = build_sidebar(view.clone(), PreferenceManager::shared(), false);
             let window = gtk::Window::builder().child(&sidebar.widget).build();
             window.present();
-            let pinned_shown = || shows_label(&sidebar.widget, "PINNED");
+            let pinned_shown = || shows_label(&sidebar.widget, "Pinned");
 
             assert!(!pinned_shown(), "nothing pinned, so no Pinned section");
             sidebar.state.set_file_drag_over(true);

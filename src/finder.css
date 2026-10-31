@@ -1,0 +1,689 @@
+/* Finder skin: macOS 27 Finder, dark appearance, measured at 3840x2160 scale 1.
+   The window is translucent; the compositor blurs what lies behind it. */
+
+@define-color finder_content rgba(30, 30, 31, 0.93);
+@define-color finder_sidebar rgba(33, 36, 44, 0.80);
+@define-color finder_bar rgba(255, 255, 255, 0.035);
+@define-color finder_selection #0059d1;
+@define-color finder_selection_inactive #464646;
+@define-color finder_divider #343434;
+@define-color finder_label alpha(white, 0.85);
+@define-color finder_secondary alpha(white, 0.55);
+@define-color finder_tertiary alpha(white, 0.30);
+@define-color finder_glass rgba(255, 255, 255, 0.07);
+@define-color finder_glass_rim_top alpha(white, 0.22);
+@define-color finder_glass_rim alpha(white, 0.10);
+
+window.background,
+window.csd,
+window {
+  font-weight: 500;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px alpha(white, 0.10);
+}
+
+.tab-window,
+.tab-context,
+.tab-context > *,
+.finder-header-row,
+.status-row {
+  background: transparent;
+}
+
+.finder-content,
+.finder-toolbar,
+.shortcut-footer {
+  background: @finder_content;
+}
+
+/* Sidebar: one full-height pane through the toolbar and status bar. */
+.sidebar-shell,
+.sidebar-split > .sidebar-shell,
+.sidebar-cap.over-sidebar {
+  background: @finder_sidebar;
+  border: none;
+}
+
+.finder-header-row {
+  min-height: 52px;
+}
+
+.sidebar-cap:not(.over-sidebar) {
+  background: @finder_content;
+}
+
+.sidebar-scroll,
+.sidebar-scroll viewport,
+.sidebar {
+  background: transparent;
+  border: none;
+}
+
+paned > separator,
+.preview-split > separator {
+  background: @finder_content;
+  background-image: none;
+  min-width: 1px;
+}
+
+.sidebar-split > separator.wide {
+  background: @finder_sidebar;
+  background-image: none;
+  min-width: 1px;
+}
+
+/* Toolbar */
+headerbar.browser-header,
+headerbar.browser-header > windowhandle,
+headerbar.browser-header > windowhandle > box {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  min-height: 52px;
+  padding: 0;
+}
+
+headerbar.browser-header .finder-toolbar {
+  padding: 0 8px 0 7px;
+  border-spacing: 6px;
+}
+
+/* Fill spare toolbar width with the search field, as Finder does. */
+headerbar.browser-header .finder-toolbar > button.search-field {
+  min-width: 36px;
+}
+
+.sidebar-cap {
+  padding: 0 8px 0 19px;
+}
+
+.traffic-lights {
+  border-spacing: 9px;
+}
+
+button.traffic-light {
+  min-width: 14px;
+  min-height: 14px;
+  padding: 0;
+  margin: 0;
+  border-radius: 9999px;
+  border: none;
+  box-shadow: inset 0 0 0 0.5px alpha(black, 0.18);
+  background: alpha(white, 0.18);
+}
+
+.traffic-lights:hover button.traffic-light.close,
+window:not(:backdrop) button.traffic-light.close { background: #f25a50; }
+.traffic-lights:hover button.traffic-light.minimize,
+window:not(:backdrop) button.traffic-light.minimize { background: #fdbd01; }
+.traffic-lights:hover button.traffic-light.zoom,
+window:not(:backdrop) button.traffic-light.zoom { background: #00bc00; }
+
+button.traffic-light image.traffic-light-glyph {
+  -gtk-icon-size: 8px;
+  opacity: 0;
+}
+
+.traffic-lights:hover button.traffic-light image.traffic-light-glyph {
+  filter: invert(1);
+  opacity: 0.55;
+}
+
+headerbar .sidebar-toggle {
+  background: transparent;
+  margin: 0;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 9999px;
+  color: @finder_secondary;
+}
+
+/* Liquid Glass capsules */
+.toolbar-capsule,
+button.search-field {
+  background-color: @finder_glass;
+  background-image: linear-gradient(to bottom, alpha(white, 0.05), alpha(white, 0) 45%);
+  border-radius: 9999px;
+  box-shadow:
+    inset 0 1px alpha(white, 0.16),
+    inset 0 -1px alpha(white, 0.10),
+    inset 1px 0 alpha(white, 0.06),
+    inset -1px 0 alpha(white, 0.06),
+    0 0 0 1px alpha(black, 0.55),
+    0 2px 6px alpha(black, 0.18);
+  min-height: 36px;
+  padding: 0 4px;
+  border-spacing: 0;
+}
+
+.toolbar-capsule button.header-action,
+.toolbar-capsule menubutton > button,
+.toolbar-capsule togglebutton,
+headerbar.browser-header .toolbar-capsule button.header-action {
+  background: transparent;
+  border-radius: 9999px;
+  margin: 3px 0;
+  min-height: 30px;
+  min-width: 36px;
+  padding: 0;
+  color: alpha(white, 0.92);
+  box-shadow: none;
+}
+
+.toolbar-capsule button.header-action:hover,
+.toolbar-capsule menubutton > button:hover {
+  background: alpha(white, 0.08);
+}
+
+.toolbar-capsule button.header-action:checked,
+.toolbar-capsule togglebutton:checked,
+.toolbar-capsule menubutton > button:checked {
+  background: alpha(white, 0.10);
+}
+
+.toolbar-capsule button.header-action:disabled {
+  opacity: 0.35;
+}
+
+.toolbar-capsule separator.capsule-divider {
+  background: alpha(white, 0.18);
+  min-width: 1px;
+  margin: 10px 2px;
+}
+
+.history-capsule button.header-action {
+  min-width: 34px;
+}
+
+button.search-field {
+  min-width: 0;
+  padding: 0 12px;
+  color: @finder_secondary;
+}
+
+button.search-field > box {
+  border-spacing: 6px;
+}
+
+.search-field-placeholder {
+  color: @finder_secondary;
+  font-size: 13px;
+}
+
+/* Title / path */
+.location-control {
+  margin-left: 6px;
+  min-width: 40px;
+}
+
+.breadcrumb {
+  color: @finder_secondary;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.breadcrumb:hover {
+  background: alpha(white, 0.08);
+  color: @finder_label;
+  border-radius: 6px;
+}
+
+.breadcrumb.current,
+.breadcrumb.current:disabled,
+.breadcrumb.current:hover {
+  background: transparent;
+  color: alpha(white, 0.92);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.breadcrumb-fade-left,
+.breadcrumb-fade-right {
+  background: none;
+}
+
+.breadcrumb-separator {
+  color: @finder_tertiary;
+}
+
+/* Sidebar rows */
+.sidebar {
+  padding: 0 10px 10px 10px;
+}
+
+.sidebar-row {
+  min-height: 32px;
+  border-radius: 9px;
+  color: alpha(white, 0.95);
+  padding: 0 0 0 8px;
+}
+
+.sidebar-row:hover,
+.sidebar-device:hover {
+  background: transparent;
+}
+
+.sidebar-row.active,
+.sidebar-row.active:hover,
+.sidebar-device.active,
+.sidebar-device.active:hover {
+  background: alpha(white, 0.137);
+  color: white;
+  font-weight: 600;
+}
+
+.sidebar-heading {
+  color: @finder_tertiary;
+  font-size: 11px;
+  font-weight: 700;
+  padding-top: 10px;
+  padding-bottom: 4px;
+  padding-left: 6px;
+}
+
+/* Columns */
+.columns,
+.mode-scroll,
+.directory-column,
+.directory-column scrolledwindow,
+.directory-column viewport,
+.directory-column listview,
+.file-list,
+.file-list-mode,
+.file-icons,
+.mode-list,
+.mode-icons,
+.browser-listing-scroll,
+.browser-listing-scroll > viewport,
+.preview-pane,
+.preview-content {
+  background: transparent;
+}
+
+.column-resize-handle {
+  border-right: 1px solid @finder_divider;
+}
+
+.column-header,
+.active-column .column-header,
+.directory-column:focus-within .column-header {
+  background: transparent;
+  border-top: none;
+  border-bottom: none;
+  color: @finder_secondary;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.file-list {
+  padding-top: 0;
+}
+
+.file-list row,
+.file-list-mode row {
+  border-radius: 6px;
+}
+
+.file-list row {
+  margin: 0 10px 0 11px;
+}
+
+.file-row {
+  min-height: 24px;
+  padding: 0 6px;
+}
+
+.file-row > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.file-list row:hover:not(:selected),
+.file-list-mode row:hover:not(:selected),
+.file-list row:hover .file-row.active-path,
+.file-list row:hover .file-row.active-path.active-parent {
+  background: transparent;
+}
+
+.file-list row:selected,
+.file-list-mode row:selected,
+.file-list row:selected:hover,
+.file-list-mode row:selected:hover,
+.keyboard-navigation .file-list row:selected:hover,
+.keyboard-navigation .file-list-mode row:selected:hover {
+  background: @finder_selection;
+  color: white;
+}
+
+.directory-column:not(:focus-within) .file-list:not(.context-selection) row:selected,
+.file-list-mode:not(:focus-within):not(.context-selection) row:selected,
+.directory-column:not(:focus-within) .file-list row:selected .file-row.active-parent,
+.directory-column:not(:focus-within) .file-list:not(.context-selection) row:selected:hover,
+.file-list-mode:not(:focus-within):not(.context-selection) row:selected:hover,
+.keyboard-navigation .directory-column:not(:focus-within) .file-list:not(.context-selection) row:selected:hover,
+.keyboard-navigation .file-list-mode:not(:focus-within):not(.context-selection) row:selected:hover,
+window:backdrop .file-list row:selected,
+window:backdrop .file-list-mode row:selected {
+  background: @finder_selection_inactive;
+  color: @finder_label;
+}
+
+.file-list .file-row.active-path,
+.file-list .file-row.active-path.active-parent {
+  background: transparent;
+}
+
+.file-chevron {
+  color: @finder_tertiary;
+}
+
+/* Status bar */
+.shortcut-footer {
+  background-image: linear-gradient(@finder_bar, @finder_bar);
+  border-top: 1px solid alpha(white, 0.10);
+  color: @finder_secondary;
+  font-size: 11px;
+  min-height: 27px;
+  padding: 0 10px;
+}
+
+.shortcut-footer-count,
+.shortcut-footer-chord,
+.shortcut-footer-feedback {
+  color: @finder_secondary;
+}
+
+.footer-cap {
+  min-height: 28px;
+}
+
+/* Finder marks the selection only by its fill. */
+.file-list row:selected .file-row,
+.file-list-mode row:selected .list-row,
+.file-list-mode row:selected,
+.file-list-mode row:focus-within,
+.keyboard-navigation .file-list:focus-within row:selected .file-row.keyboard-cursor:not(.filter-result) {
+  outline-color: transparent;
+}
+
+/* Pane headers (List and Icons) sit flush in the content like Finder's. */
+.finder-content viewport,
+.finder-content listview,
+.finder-content gridview,
+.mode-list,
+.mode-list viewport,
+.mode-icons viewport,
+.mode-icons gridview,
+.mode-pane-header,
+.list-pane,
+.icons-pane,
+.mode-list listview,
+.preview-content viewport,
+.preview-header {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.mode-pane-header {
+  min-height: 30px;
+  color: @finder_secondary;
+}
+
+/* List view */
+.list-headings {
+  background: @finder_bar;
+  border-bottom: 1px solid alpha(white, 0.12);
+  color: @finder_secondary;
+  font-size: 11px;
+  font-weight: 500;
+  min-height: 27px;
+}
+
+.list-heading-cell {
+  border-right: none;
+  box-shadow: inset -1px 0 alpha(white, 0.14);
+  margin: 6px 0;
+}
+
+.list-heading-button {
+  min-height: 15px;
+  padding: 0 8px;
+  color: @finder_secondary;
+}
+
+.list-heading-button:hover,
+.list-heading-button:active {
+  background: transparent;
+  color: @finder_label;
+}
+
+.list-listing-scroll > listview {
+  padding-top: 2px;
+}
+
+.file-list-mode row {
+  margin: 0 10px;
+  border-radius: 5px;
+}
+
+.file-list-mode > row:nth-child(even):not(:selected) {
+  background: alpha(white, 0.04);
+}
+
+.list-row {
+  min-height: 20px;
+}
+
+.list-row > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.mode-list.density-airy .list-row {
+  min-height: 28px;
+}
+
+/* Icons view */
+.file-icons > child:selected .icons-card-icon-frame {
+  background: alpha(white, 0.10);
+  outline: none;
+  border-radius: 8px;
+}
+
+.file-icons > child .icons-card.content-hover .icons-card-icon-frame,
+.file-icons > child .icons-card.content-hover .icons-card-label {
+  background: transparent;
+}
+
+.file-icons > child:selected .icons-card-label,
+.file-icons > child:selected:hover .icons-card-label,
+.file-icons > child:selected .icons-card.content-hover .icons-card-label {
+  background: @finder_selection;
+  color: white;
+  border-radius: 5px;
+}
+
+window:backdrop .file-icons > child:selected .icons-card-label,
+.file-icons:not(:focus-within) > child:selected .icons-card-label {
+  background: @finder_selection_inactive;
+}
+
+.icons-card-label {
+  font-size: 12px;
+}
+
+.icons-card-details {
+  color: @finder_secondary;
+  font-size: 11px;
+}
+
+/* Preview column */
+.preview-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: @finder_label;
+}
+
+.preview-metadata {
+  color: @finder_secondary;
+  font-size: 11px;
+}
+
+/* Menus and popovers: dark Liquid Glass platters. */
+popover > contents,
+.appearance-popover contents,
+.folder-context-popover contents,
+.breadcrumb-popover contents,
+.path-completion-popover contents,
+.icons-thumbnail-popover contents,
+.peek-popover,
+text > popover.menu > contents,
+textview > popover.menu > contents {
+  background: rgba(46, 50, 58, 0.97);
+  border: none;
+  border-radius: 13px;
+  box-shadow:
+    inset 0 1px alpha(white, 0.18),
+    inset 0 0 0 1px alpha(white, 0.08),
+    0 0 0 1px alpha(black, 0.85),
+    0 10px 30px alpha(black, 0.35);
+  color: @finder_label;
+}
+
+.appearance-menu,
+.folder-context-menu,
+.item-context-menu {
+  padding: 5px;
+}
+
+.appearance-option,
+.actions-context-popover modelbutton,
+.actions-context-popover button.model,
+.item-context-option,
+.folder-context-option,
+text > popover.menu modelbutton,
+textview > popover.menu modelbutton,
+text > popover.menu button.model,
+textview > popover.menu button.model {
+  min-height: 24px;
+  border-radius: 8px;
+  padding: 0 12px;
+  color: @finder_label;
+}
+
+.appearance-option:hover,
+.actions-context-popover modelbutton:hover,
+.actions-context-popover modelbutton:selected,
+.actions-context-popover button.model:hover,
+.actions-context-popover button.model:selected,
+.item-context-option:hover,
+.item-context-option:focus-visible,
+.folder-context-option:hover,
+.folder-context-option:focus-visible,
+text > popover.menu modelbutton:hover,
+textview > popover.menu modelbutton:hover,
+text > popover.menu button.model:hover,
+textview > popover.menu button.model:hover {
+  background: @finder_selection;
+  color: white;
+}
+
+.appearance-menu separator,
+.actions-context-popover separator,
+.folder-context-menu separator,
+.item-context-menu separator,
+text > popover.menu separator,
+textview > popover.menu separator {
+  background: alpha(white, 0.14);
+  margin: 5px 12px;
+  min-height: 1px;
+}
+
+.menu-heading,
+.item-context-summary,
+.actions-context-popover label.separator {
+  color: @finder_tertiary;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.item-context-title {
+  color: @finder_label;
+}
+
+tooltip,
+tooltip.background {
+  background: rgba(46, 50, 58, 0.97);
+  border-radius: 7px;
+  box-shadow: inset 0 0 0 1px alpha(white, 0.10), 0 0 0 1px alpha(black, 0.7);
+  color: @finder_label;
+  font-size: 11px;
+}
+
+/* Overlay scrollbars: thin gray capsule. */
+scrollbar > range > trough > slider {
+  background: alpha(white, 0.35);
+  border-radius: 9999px;
+}
+
+scrollbar > range > trough {
+  background: transparent;
+}
+
+/* Entries and buttons in dialogs */
+entry,
+.form-control > button,
+dropdown > button {
+  border-radius: 7px;
+}
+
+entry:focus-within {
+  box-shadow: 0 0 0 3px alpha(@strata_accent, 0.5);
+}
+
+/* Tab strip: Finder's tab bar is a recessed track of equal tabs. */
+.tab-strip {
+  background: @finder_content;
+  box-shadow: inset 0 -1px alpha(white, 0.06);
+  min-height: 34px;
+}
+
+.browser-tab {
+  background: alpha(white, 0.04);
+  border-radius: 8px;
+  margin: 4px 2px;
+  color: @finder_secondary;
+}
+
+.browser-tab.active {
+  background: alpha(white, 0.12);
+  color: @finder_label;
+}
+
+.browser-tab.hovered:not(.active) {
+  background: alpha(white, 0.07);
+  color: @finder_label;
+}
+
+.tab-strip .tab-select {
+  font-weight: 500;
+  opacity: 1;
+}
+
+/* Sizes beside names read as plain secondary text. */
+.file-list .file-size,
+.file-list .file-row.active-path .file-size {
+  background: transparent;
+  box-shadow: none;
+  color: @finder_secondary;
+}
+
+.file-list row:selected .file-size {
+  color: alpha(white, 0.75);
+}
+
+.preview-pane picture,
+.preview-content picture {
+  border-radius: 6px;
+}

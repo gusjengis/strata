@@ -456,25 +456,18 @@ impl TabWindow {
             if let Some(parent) = header.new_tab.parent().and_downcast::<gtk::Box>() {
                 parent.remove(&header.new_tab);
             }
-            if let Some(parent) = header.close.parent().and_downcast::<gtk::Box>() {
-                parent.remove(&header.close);
-            }
+            // The close light stays with the other window controls in each tab's toolbar.
             if multiple && tab.id == self.active.get() {
                 self.strip.actions.append(&header.new_tab);
-                self.strip.end.append(&header.close);
             } else {
                 header.actions.prepend(&header.new_tab);
-                header.actions.append(&header.close);
                 header.new_tab.set_visible(!multiple);
-                header
-                    .close
-                    .set_visible(!multiple && self.preferences.window_show_close());
             }
+            header
+                .close
+                .set_visible(self.preferences.window_show_close());
             if tab.id == self.active.get() {
                 header.new_tab.set_visible(true);
-                header
-                    .close
-                    .set_visible(self.preferences.window_show_close());
             }
         }
         self.strip.hints(self.hints.get());

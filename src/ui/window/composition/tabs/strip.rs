@@ -130,7 +130,6 @@ pub(super) struct TabStrip {
     insertion: Rc<Cell<Option<usize>>>,
     drag_source: glib::WeakRef<gtk::DragSource>,
     pub(super) actions: gtk::Box,
-    pub(super) end: gtk::Box,
 }
 
 impl TabStrip {
@@ -142,9 +141,6 @@ impl TabStrip {
         accessibility::set_label(&row, &crate::i18n::tr("Tabs"));
         let actions = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         actions.set_valign(gtk::Align::Center);
-        let end = gtk::Box::new(gtk::Orientation::Horizontal, 0);
-        end.add_css_class("header-actions");
-        end.set_valign(gtk::Align::Center);
         let flow = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         flow.append(&row);
         flow.append(&actions);
@@ -167,7 +163,6 @@ impl TabStrip {
         let content = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         content.set_hexpand(true);
         content.append(&scroller);
-        content.append(&end);
         widget.append(&content);
         let headers = Rc::new(RefCell::new(Vec::<Header>::new()));
         let indicator = Rc::new(Indicator::default());
@@ -235,7 +230,6 @@ impl TabStrip {
             insertion,
             drag_source: glib::WeakRef::new(),
             actions,
-            end,
         }
     }
 

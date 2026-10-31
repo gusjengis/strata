@@ -1113,6 +1113,14 @@ fn appearance_row(icon: &str, label: &str, checked: bool) -> (gtk::Box, gtk::Ima
     (row, check, option)
 }
 
+/// Finder's sidebar sections read "Favorites", not "FAVORITES".
+fn title_case(text: &str) -> String {
+    let mut chars = text.chars();
+    chars.next().map_or_else(String::new, |first| {
+        first.to_uppercase().chain(chars.flat_map(char::to_lowercase)).collect()
+    })
+}
+
 fn append_menu_heading(container: &gtk::Box, text: &str) {
     let heading = gtk::Label::new(Some(text));
     heading.set_xalign(0.0);
@@ -2394,7 +2402,7 @@ impl SidebarState {
     }
 
     fn append_heading(&self, text: &str) {
-        let heading = gtk::Label::new(Some(&crate::i18n::tr(text)));
+        let heading = gtk::Label::new(Some(&title_case(&crate::i18n::tr(text))));
         heading.add_css_class("sidebar-heading");
         heading.set_xalign(0.0);
         self.widget.append(&heading);
