@@ -308,6 +308,15 @@ fn empty_directory_focus_is_a_named_mapped_surface_and_tabs_out() {
                         )
                     });
 
+                // GTK's Tab traversal needs the new page's first painted frame.
+                let painted = Rc::new(Cell::new(false));
+                let ready = painted.clone();
+                let clock = surface.frame_clock().expect("mapped surface frame clock");
+                let handler = clock.connect_after_paint(move |_| ready.set(true));
+                surface.queue_draw();
+                wait_until(|| painted.get());
+                clock.disconnect(handler);
+
                 tab(&fixture, gtk::DirectionType::TabForward);
                 assert_eq!(
                     focus(&fixture).as_ref(),
@@ -376,6 +385,48 @@ fn tab_inside_an_inline_rename_commits_and_leaves_the_list() {
                 );
                 wait_until(|| !fixture.view.rename_is_active());
             }
+        },
+    );
+}
+
+#[test]
+fn an_inline_rename_stays_open_while_the_window_is_inactive() {
+    crate::test_support::gtk_test(
+        "ui::window::tests::keyboard_dispatch::pane_focus::an_inline_rename_stays_open_while_the_window_is_inactive",
+        || {
+            let fixture = KeyboardFixture::new();
+            let directory = fixture._directory.path().to_path_buf();
+            let other = gtk::Window::new();
+            for (mode, original) in MODES.into_iter().zip(["a.txt", "b.txt", "c.txt"]) {
+                fixture.view.set_view_mode(mode);
+                select_named(&fixture, original);
+                wait_until(|| fixture.view.rename_is_active() || fixture.view.begin_rename());
+                wait_until(|| fixture.view.active_rename_field().is_some());
+                let field = fixture.view.active_rename_field().expect("rename field");
+                wait_until(|| focus(&fixture).is_some_and(|focused| focused.is_ancestor(&field)));
+                let renamed = format!("kept-{original}");
+                field.set_text(&renamed);
+
+                other.present();
+                wait_until(|| other.is_active() && !fixture.window.is_active());
+                assert!(
+                    fixture.view.rename_is_active(),
+                    "{mode:?}: the window losing focus ended the rename"
+                );
+                assert!(directory.join(original).is_file(), "{mode:?}");
+
+                fixture.window.present();
+                wait_until(|| fixture.window.is_active());
+                assert!(
+                    focus(&fixture).is_some_and(|focused| focused.is_ancestor(&field)),
+                    "{mode:?}: the rename field lost focus: {}",
+                    describe_focus(&fixture)
+                );
+                field.emit_activate();
+                wait_until(|| directory.join(&renamed).is_file());
+                wait_until(|| !fixture.view.rename_is_active());
+            }
+            other.destroy();
         },
     );
 }

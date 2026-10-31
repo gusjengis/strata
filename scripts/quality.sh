@@ -11,9 +11,9 @@ if [[ -z "$engine" ]]; then
 fi
 image="${STRATA_QUALITY_IMAGE:-}"
 if [[ -z "$image" ]]; then
-  image="$(python3 "$repository/scripts/e2e_base.py" ensure --engine "$engine")"
+  image="$(python3 "$repository/scripts/image_base.py" ensure --engine "$engine")"
 else
-  image="$(python3 "$repository/scripts/e2e_base.py" verify "$image" --engine "$engine")"
+  image="$(python3 "$repository/scripts/image_base.py" verify "$image" --engine "$engine")"
 fi
 user_id="$(id -u)"
 group_id="$(id -g)"
@@ -27,7 +27,9 @@ fi
 if [[ "$group_id" != 0 ]]; then
   printf 'strata-quality:x:%s:\n' "$group_id" >> "$accounts/group"
 fi
-options=(--rm --platform=linux/amd64 --user "$user_id:$group_id" --shm-size=512m)
+# Tests need O_TMPFILE in their temporary folders, which an overlay /tmp may refuse.
+options=(--rm --platform=linux/amd64 --user "$user_id:$group_id" --shm-size=512m
+  --tmpfs /tmp:rw,exec,nosuid,nodev,size=2g,mode=1777)
 if [[ "$(basename "$engine")" == podman ]]; then
   options+=(--userns=keep-id --passwd=false)
 fi

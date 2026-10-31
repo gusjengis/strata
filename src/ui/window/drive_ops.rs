@@ -32,8 +32,20 @@ impl FilesystemType {
         match self {
             Self::Fat32 => 11,
             Self::Ntfs => 32,
-            Self::Exfat => 32,
+            Self::Exfat => 11,
         }
+    }
+
+    /// The unit `max_label_len` counts, as libblockdev checks it before UDisks wipes.
+    pub(super) fn label_measure(self) -> fn(&str) -> usize {
+        match self {
+            Self::Fat32 => str::len,
+            Self::Ntfs | Self::Exfat => |label| label.encode_utf16().count(),
+        }
+    }
+
+    pub(super) fn label_fits(self, label: &str) -> bool {
+        self.label_measure()(label) <= self.max_label_len()
     }
 
     pub(super) fn label_character_error(self, label: &str) -> Option<String> {
@@ -188,6 +200,7 @@ impl From<glib::Error> for DriveOpError {
 
 /// Locate an executable through `PATH` plus the usual sbin directories.
 fn tool_path(cmd: &str) -> Option<PathBuf> {
+    crate::util::ui_thread::assert_off();
     if cmd.contains('/') {
         let path = PathBuf::from(cmd);
         return is_executable(&path).then_some(path);
@@ -244,13 +257,11 @@ pub(super) fn usage_for_path(path: &Path) -> Option<(u64, u64)> {
 }
 
 pub(super) fn block_device_for_path(path: &Path) -> Option<PathBuf> {
-    let table = std::fs::read("/proc/self/mountinfo").ok()?;
-    super::devices::block_device_from_mount_table(&table, path)
+    super::devices::block_device_from_mount_table(&crate::adapters::mount_watch::latest(), path)
 }
 
 pub(super) fn mounted_path_for_device(device: &Path) -> Option<PathBuf> {
-    let table = std::fs::read("/proc/self/mountinfo").ok()?;
-    super::devices::mounted_path_from_table(&table, device)
+    super::devices::mounted_path_from_table(&crate::adapters::mount_watch::latest(), device)
 }
 
 /// Human-readable filesystem name for a block device.
@@ -322,7 +333,7 @@ pub(super) async fn format_volume(
     if !is_eligible(Some(&volume)) {
         return Err(DriveOpError::DeviceNotFound);
     }
-    if label.chars().count() > fs_type.max_label_len() {
+    if !fs_type.label_fits(&label) {
         return Err(DriveOpError::InvalidLabel(crate::i18n::tr(
             "Filesystem label is too long.",
         )));

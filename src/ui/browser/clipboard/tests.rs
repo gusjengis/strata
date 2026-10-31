@@ -141,6 +141,7 @@ fn drag_preview_icon_renders_single_and_multiple_entries() {
                     image_dimensions: MetadataValue::Unknown,
                     child_count: MetadataValue::Unknown,
                     duration_seconds: MetadataValue::Unknown,
+                    listable: MetadataValue::Unknown,
                 }
             }
 
@@ -344,25 +345,42 @@ fn file_drop_action_hover_matches_cross_volume_strategy() {
 }
 
 #[test]
-fn file_drop_commit_rejects_the_recent_collection() {
+fn file_drop_commit_waits_for_the_volume_answer_and_rejects_the_recent_collection() {
     crate::test_support::gtk_test(
-        "ui::browser::clipboard::tests::file_drop_commit_rejects_the_recent_collection",
+        "ui::browser::clipboard::tests::file_drop_commit_waits_for_the_volume_answer_and_rejects_the_recent_collection",
         || {
-            let recent = Location::uri("recent:///");
-            let prepared = prepare_file_drop_target({
-                let recent = recent.clone();
-                move || Some(recent.clone())
-            });
-
-            assert_eq!(
+            let root = tempfile::tempdir().expect("fixture");
+            std::fs::create_dir(root.path().join("folder")).expect("folder");
+            std::fs::write(root.path().join("note.txt"), b"x").expect("source");
+            for (destination, source, expected) in [
+                (
+                    Location::uri("recent:///"),
+                    Location::local("/fixture/source.txt"),
+                    crate::services::DropCommit::Forbidden,
+                ),
+                (
+                    Location::local(root.path().join("folder")),
+                    Location::local(root.path().join("note.txt")),
+                    crate::services::DropCommit::Move,
+                ),
+            ] {
+                let prepared = prepare_file_drop_target({
+                    let destination = destination.clone();
+                    move || Some(destination.clone())
+                });
+                let committed = Rc::new(Cell::new(None));
+                let sink = committed.clone();
                 file_drop_commit(
                     &prepared.target,
-                    &recent,
-                    &[Location::local("/fixture/source.txt")],
+                    destination.clone(),
+                    vec![source],
                     &prepared.state,
-                ),
-                crate::services::DropCommit::Forbidden
-            );
+                    move |_, _, commit| sink.set(Some(commit)),
+                );
+                prepared.state.reset();
+                pump_main_loop_until(Duration::from_secs(5), || committed.get().is_some());
+                assert_eq!(committed.get(), Some(expected), "{destination:?}");
+            }
         },
     );
 }
@@ -1086,7 +1104,8 @@ fn directory_drag_snapshot_uses_entry_metadata_without_touching_paths() {
                         entry
                     })
                     .collect::<Vec<_>>();
-                let content = file_drag_content(&entries).expect("drag content");
+                let content =
+                    file_drag_content(&gtk::DragSource::new(), &entries).expect("drag content");
                 let snapshot = drag_snapshot_for_content(&content).expect("trusted snapshot");
                 assert_eq!(
                     &*snapshot.locations,
@@ -1119,7 +1138,8 @@ fn a_cached_internal_drag_never_replaces_another_drops_sources() {
         "ui::browser::clipboard::tests::a_cached_internal_drag_never_replaces_another_drops_sources",
         || {
             let dragged = crate::test_support::operations::entry(Location::local("/fixture/a.txt"));
-            let _content = file_drag_content(&[dragged]).expect("drag content");
+            let _content =
+                file_drag_content(&gtk::DragSource::new(), &[dragged]).expect("drag content");
             let prepared = prepare_file_drop_target(|| Some(Location::local("/fixture/dest")));
 
             assert!(prepared.state.sources(&prepared.target).is_empty());
