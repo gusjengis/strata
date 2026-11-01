@@ -257,13 +257,22 @@ pub(in crate::ui::window) fn history_capsule(view: &BrowserView) -> gtk::Box {
     let mut buttons = Vec::new();
     for (icon, tooltip, binding, forward) in [
         (icons::CHEVRON_LEFT, "Back (%{keys})", HISTORY_BACK, false),
-        (icons::CHEVRON_RIGHT, "Forward (%{keys})", HISTORY_FORWARD, true),
+        (
+            icons::CHEVRON_RIGHT,
+            "Forward (%{keys})",
+            HISTORY_FORWARD,
+            true,
+        ),
     ] {
         let button = header_action(icon, "");
         let keys = Keys::One(binding.alternate(0).shown());
         crate::ui::shortcut_reference::follow_tooltip(&button, tooltip, keys);
         crate::ui::shortcut_reference::follow_label(&button, tooltip, keys);
-        button.add_css_class(if forward { "history-forward" } else { "history-back" });
+        button.add_css_class(if forward {
+            "history-forward"
+        } else {
+            "history-back"
+        });
         let weak = Rc::downgrade(&browser);
         button.connect_clicked(move |_| {
             if let Some(browser) = weak.upgrade() {

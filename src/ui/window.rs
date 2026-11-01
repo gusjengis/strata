@@ -1108,7 +1108,10 @@ fn appearance_row(icon: &str, label: &str, checked: bool) -> (gtk::Box, gtk::Ima
 fn title_case(text: &str) -> String {
     let mut chars = text.chars();
     chars.next().map_or_else(String::new, |first| {
-        first.to_uppercase().chain(chars.flat_map(char::to_lowercase)).collect()
+        first
+            .to_uppercase()
+            .chain(chars.flat_map(char::to_lowercase))
+            .collect()
     })
 }
 

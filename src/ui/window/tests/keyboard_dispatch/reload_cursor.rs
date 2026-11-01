@@ -377,7 +377,11 @@ fn wait_for_viewport(fixture: &KeyboardFixture) -> Option<gtk::Adjustment> {
 }
 
 fn history_button(fixture: &KeyboardFixture, index: usize) -> Result<gtk::Button, String> {
-    let class = if index == 0 { "history-back" } else { "history-forward" };
+    let class = if index == 0 {
+        "history-back"
+    } else {
+        "history-forward"
+    };
     mapped_button(fixture.window.upcast_ref(), &|button| {
         button.has_css_class(class)
     })
@@ -594,9 +598,7 @@ fn icons_return_case(
                 // Focus that must stay put has no settle condition.
                 pump(300);
                 // Back disables at the start of history, which drops its focus.
-                focus(&fixture).is_some_and(|focused| {
-                    focused.is_ancestor(&fixture.view.widget())
-                })
+                focus(&fixture).is_some_and(|focused| focused.is_ancestor(&fixture.view.widget()))
             } =>
         {
             failures.push(format!(

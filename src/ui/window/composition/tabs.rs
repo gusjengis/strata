@@ -510,9 +510,8 @@ impl TabWindow {
         let mut cap_width = None;
         for tab in self.tabs.borrow().iter() {
             let header = &tab.content.header;
-            let lifted = multiple
-                && tab.id == active
-                && header.sidebar_cap.has_css_class("over-sidebar");
+            let lifted =
+                multiple && tab.id == active && header.sidebar_cap.has_css_class("over-sidebar");
             let home: &gtk::Box = if lifted {
                 &self.strip_cap
             } else {
