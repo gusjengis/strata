@@ -1203,6 +1203,7 @@ impl PreviewState {
         let response = match &event {
             PreviewEvent::Progress { request_id, .. } => *request_id,
             PreviewEvent::Ready(preview) => preview.request_id,
+            PreviewEvent::Sharpened { request_id, .. } => *request_id,
             PreviewEvent::Failed { request_id, .. } => *request_id,
             PreviewEvent::NeedsPassword { request_id, .. } => *request_id,
         };
@@ -1218,6 +1219,9 @@ impl PreviewState {
             PreviewEvent::Ready(preview) if preview.request_id == expected => {
                 self.cancel_loading();
                 self.render(preview);
+            }
+            PreviewEvent::Sharpened { request_id, png } if request_id == expected => {
+                self.sharpen_image(png);
             }
             PreviewEvent::Failed {
                 request_id,
@@ -1273,8 +1277,34 @@ impl PreviewState {
                 self.render_archive_password_prompt(entry, None);
             }
             PreviewEvent::Ready(_)
+            | PreviewEvent::Sharpened { .. }
             | PreviewEvent::Failed { .. }
             | PreviewEvent::NeedsPassword { .. } => {}
+        }
+    }
+
+    /// Replaces the quick image render with its full-detail version in place.
+    fn sharpen_image(&self, png: Vec<u8>) {
+        let mut picture = None;
+        let mut pending = vec![self.content.clone().upcast::<gtk::Widget>()];
+        while let Some(widget) = pending.pop() {
+            if widget.has_css_class("preview-image")
+                && let Some(found) = widget.downcast_ref::<gtk::Picture>()
+            {
+                picture = Some(found.clone());
+                break;
+            }
+            let mut child = widget.first_child();
+            while let Some(next) = child {
+                child = next.next_sibling();
+                pending.push(next);
+            }
+        }
+        let Some(picture) = picture else {
+            return;
+        };
+        if let Ok(texture) = gtk::gdk::Texture::from_bytes(&glib::Bytes::from_owned(png)) {
+            media_layout::replace_picture(&picture, &texture);
         }
     }
 
@@ -2092,6 +2122,7 @@ impl PreviewState {
                     }
                     PreviewEvent::Progress { .. }
                     | PreviewEvent::Ready(_)
+                    | PreviewEvent::Sharpened { .. }
                     | PreviewEvent::Failed { .. }
                     | PreviewEvent::NeedsPassword { .. } => return,
                 }

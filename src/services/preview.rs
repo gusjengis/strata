@@ -175,6 +175,12 @@ pub enum PreviewEvent {
         stage: ModelPreviewStage,
     },
     Ready(Preview),
+    /// A full-detail render replacing the image of the `Ready` preview with the
+    /// same request.
+    Sharpened {
+        request_id: PreviewRequestId,
+        png: Vec<u8>,
+    },
     Failed {
         request_id: PreviewRequestId,
         entry: FileEntry,

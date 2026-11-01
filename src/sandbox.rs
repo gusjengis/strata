@@ -35,6 +35,9 @@ pub(crate) const FILE_SIZE_LIMIT_BYTES: u64 = 512 * 1024 * 1024;
 const TEMPORARY_STORAGE_LIMIT_BYTES: u64 = 512 * 1024 * 1024;
 const MAX_RASTER_INPUT_BYTES: u64 = 512 * 1024 * 1024;
 pub(crate) const MAX_OUTPUT_BYTES: u64 = 32 * 1024 * 1024;
+/// Long-edge cap of a sharp image preview: the widest preview pane at scale 2.
+/// Its fastest PNG stays within `MAX_OUTPUT_BYTES` even with alpha.
+pub(crate) const SHARP_PREVIEW_EDGE: u32 = 2560;
 pub(crate) const MAX_TEXT_LAYER_BYTES: u64 = 8 * 1024 * 1024;
 static NEXT_DIRECTORY: AtomicU64 = AtomicU64::new(1);
 
@@ -184,6 +187,9 @@ pub(crate) enum ParseOperation {
     ThumbnailCover(CoverFormat),
     PreviewCover(CoverFormat),
     PreviewImage,
+    /// The full-detail follow-up to `PreviewImage`, decoded once the quick
+    /// render is on screen.
+    PreviewImageSharp,
     PreviewRaw,
     InspectImage,
     ConvertImage,
@@ -225,6 +231,7 @@ impl ParseOperation {
             Self::ThumbnailCover(_) => "thumbnail-cover",
             Self::PreviewCover(_) => "preview-cover",
             Self::PreviewImage => "preview-image",
+            Self::PreviewImageSharp => "preview-image-sharp",
             Self::PreviewRaw => "preview-raw",
             Self::InspectImage => "inspect-image",
             Self::ConvertImage => "convert-image",
@@ -314,6 +321,11 @@ impl ParseOperation {
             | Self::DocumentImage
             | Self::DocumentMermaid
             | Self::DocumentMath { .. } => Some((800, 800, 800 * 800)),
+            Self::PreviewImageSharp => Some((
+                SHARP_PREVIEW_EDGE,
+                SHARP_PREVIEW_EDGE,
+                u64::from(SHARP_PREVIEW_EDGE) * u64::from(SHARP_PREVIEW_EDGE),
+            )),
             Self::PreviewPdf(size) => Some(size.image_limits()),
             Self::PreviewModel(render) => {
                 let size = MediaPreviewSize::new(render.size.width, render.size.height);
@@ -340,6 +352,7 @@ impl ParseOperation {
             | Self::ThumbnailRaw
             | Self::ThumbnailPdf
             | Self::PreviewImage
+            | Self::PreviewImageSharp
             | Self::PreviewRaw
             | Self::RawMetadata
             | Self::PreviewPdf(_) => Some(MAX_RASTER_INPUT_BYTES),

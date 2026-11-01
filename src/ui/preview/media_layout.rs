@@ -242,6 +242,17 @@ impl MediaLayout {
     }
 }
 
+/// Swaps the image of a `section` picture, keeping the section's fit in step.
+pub(super) fn replace_picture(picture: &gtk::Picture, paintable: &impl IsA<gdk::Paintable>) {
+    picture.set_paintable(Some(paintable));
+    if let Some(section) = picture.parent() {
+        if let Some(layout) = section.layout_manager().and_downcast::<MediaLayout>() {
+            layout.set_paintable(Some(paintable.as_ref()));
+        }
+        section.queue_resize();
+    }
+}
+
 pub(super) fn section(
     media: &impl IsA<gtk::Widget>,
     paintable: &impl IsA<gdk::Paintable>,

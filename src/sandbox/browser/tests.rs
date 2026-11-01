@@ -730,6 +730,27 @@ fn preview_operations_render_inside_the_decoder() {
         ParseOperation::PreviewImage,
         &response.png
     ));
+    let photo = directory.path().join("photo.png");
+    image::RgbImage::from_pixel(1200, 600, image::Rgb([40, 90, 160]))
+        .save(&photo)
+        .expect("fixture");
+    let quick = crate::sandbox_helper::browser_render(&photo, Operation::PreviewImage);
+    let sharp = crate::sandbox_helper::browser_render(&photo, Operation::PreviewImageSharp);
+    assert!(super::super::valid_output(
+        ParseOperation::PreviewImageSharp,
+        &sharp.png
+    ));
+    let long_edge = |png: &[u8]| {
+        let size = image::load_from_memory(png).expect("png");
+        size.width().max(size.height())
+    };
+    // The quick render stops at its cap; the sharp one keeps the source's detail.
+    assert_eq!(long_edge(&quick.png), 800);
+    assert_eq!(long_edge(&sharp.png), 1200);
+    assert!(!super::super::valid_output(
+        ParseOperation::PreviewImage,
+        &sharp.png
+    ));
     let tex = directory.path().join("equation.tex");
     std::fs::write(&tex, "x^2").expect("fixture");
     let response = crate::sandbox_helper::browser_render(&tex, Operation::DocumentMath);

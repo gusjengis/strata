@@ -212,6 +212,10 @@ pub(crate) fn run(arguments: &[String]) -> Result<(), String> {
             None,
         ),
         "preview-image" | "document-image" => (document_media::image(input, 800)?, None),
+        "preview-image-sharp" => (
+            document_media::image(input, crate::sandbox::SHARP_PREVIEW_EDGE)?,
+            None,
+        ),
         "document-mermaid" => (document_media::mermaid(input)?, None),
         "document-math" => (document_media::math(input, true)?, None),
         "document-inline-math" => (document_media::math(input, false)?, None),
@@ -463,6 +467,10 @@ pub(crate) fn browser_render(
         }
         Operation::PreviewImage => {
             response.png = document_media::image(input, 800).unwrap_or_default();
+        }
+        Operation::PreviewImageSharp => {
+            response.png = document_media::image(input, crate::sandbox::SHARP_PREVIEW_EDGE)
+                .unwrap_or_default();
         }
         Operation::PreviewRaw => {
             response.png = render_camera_raw_preview(input, 800).unwrap_or_default();

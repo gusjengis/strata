@@ -783,9 +783,14 @@ impl LocalPreviewProvider {
                     }
                 };
                 drop(heavy_permit);
-                if let Some(cache_key) = cache_key {
+                // The quick render hit its edge cap, so the source holds more detail.
+                let sharpen = matches!(operation, ParseOperation::PreviewImage)
+                    && entry.location.native_path().is_some()
+                    && matches!(&content, PreviewContent::Rasterized { png }
+                        if png_long_edge(png).is_some_and(|edge| edge >= 800));
+                if let Some(cache_key) = cache_key.as_ref() {
                     PREVIEW_CACHE.with(|cache| {
-                        cache.borrow_mut().insert(cache_key, content.clone());
+                        cache.borrow_mut().insert(cache_key.clone(), content.clone());
                     });
                 }
                 emit(PreviewEvent::Ready(Preview {
@@ -794,6 +799,39 @@ impl LocalPreviewProvider {
                     content_type,
                     content,
                 }));
+                if sharpen {
+                    let cancellation = cancellation_for_task.clone();
+                    let sharp_path = path.clone();
+                    // Plain images always render through the sandbox parser.
+                    let sharp = gio::spawn_blocking(move || {
+                        crate::sandbox::parse(
+                            &sharp_path,
+                            ParseOperation::PreviewImageSharp,
+                            0,
+                            media_preview_backend,
+                            &cancellation,
+                        )
+                    })
+                    .await;
+                    if let Ok(Ok(output)) = sharp
+                        && !cancellation_for_task.is_cancelled()
+                    {
+                        if let Some(cache_key) = cache_key {
+                            PREVIEW_CACHE.with(|cache| {
+                                cache.borrow_mut().insert(
+                                    cache_key,
+                                    PreviewContent::Rasterized {
+                                        png: output.data.clone(),
+                                    },
+                                );
+                            });
+                        }
+                        emit(PreviewEvent::Sharpened {
+                            request_id,
+                            png: output.data,
+                        });
+                    }
+                }
                 if let Some((path, mtime, png)) = thumbnail_to_store {
                     let _ = gio::spawn_blocking(move || {
                         crate::ui::thumbnail_cache::store(&path, mtime, &png);
@@ -985,6 +1023,15 @@ fn decode_utf16(body: &[u8], unit: fn([u8; 2]) -> u16) -> String {
         .map(|pair| unit(*pair))
         .collect();
     String::from_utf16_lossy(&units)
+}
+
+/// The longer side of a PNG, read from its header.
+fn png_long_edge(png: &[u8]) -> Option<u32> {
+    let header = png.get(16..24)?;
+    let width = u32::from_be_bytes(header[..4].try_into().ok()?);
+    let height = u32::from_be_bytes(header[4..].try_into().ok()?);
+    png.starts_with(b"\x89PNG\r\n\x1a\n")
+        .then_some(width.max(height))
 }
 
 #[cfg(test)]

@@ -208,6 +208,7 @@ fn uri_images_stage_private_inputs_and_remove_them_after_rendering() {
                         }
                         PreviewEvent::NeedsPassword { .. } => panic!("no password prompt expected"),
                         PreviewEvent::Progress { .. } => panic!("no model progress expected"),
+                        PreviewEvent::Sharpened { .. } => panic!("remote previews stay quick"),
                     }
                     let path = staged_path
                         .lock()
