@@ -1601,7 +1601,7 @@ impl SidebarState {
                 }
                 let location = Location::uri("network:///");
                 let row = self.append_place(
-                    crate::assets::icons::NETWORK,
+                    crate::assets::icons::GLOBE,
                     &crate::i18n::tr("Network"),
                     location.clone(),
                 );
@@ -4132,17 +4132,17 @@ fn standard_place_chord_key(id: &str) -> Option<super::keys::Command> {
 fn standard_place(id: &str) -> Option<(&'static str, &'static str, glib::UserDirectory)> {
     match id {
         "desktop" => Some((
-            crate::assets::icons::FOLDER,
+            crate::assets::icons::SIDEBAR_DESKTOP,
             "Desktop",
             glib::UserDirectory::Desktop,
         )),
         "documents" => Some((
-            crate::assets::icons::DOCUMENTS,
+            crate::assets::icons::SIDEBAR_DOCUMENTS,
             "Documents",
             glib::UserDirectory::Documents,
         )),
         "downloads" => Some((
-            crate::assets::icons::DOWNLOADS,
+            crate::assets::icons::SIDEBAR_DOWNLOADS,
             "Downloads",
             glib::UserDirectory::Downloads,
         )),
@@ -4157,7 +4157,7 @@ fn standard_place(id: &str) -> Option<(&'static str, &'static str, glib::UserDir
             glib::UserDirectory::Pictures,
         )),
         "videos" => Some((
-            crate::assets::icons::VIDEOS,
+            crate::assets::icons::SIDEBAR_MOVIES,
             "Videos",
             glib::UserDirectory::Videos,
         )),

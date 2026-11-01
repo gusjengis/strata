@@ -39,6 +39,11 @@ pub mod icons {
     pub const DISC: &str = "strata-disc";
     pub const DOCUMENTS: &str = "strata-file-text";
     pub const ELLIPSIS: &str = "strata-ellipsis";
+    // Finder's sidebar glyphs for the standard places.
+    pub const SIDEBAR_DESKTOP: &str = "strata-panel-bottom";
+    pub const SIDEBAR_DOCUMENTS: &str = "strata-file";
+    pub const SIDEBAR_DOWNLOADS: &str = "strata-circle-arrow-down";
+    pub const SIDEBAR_MOVIES: &str = "strata-film";
     pub const DOWNLOADS: &str = "strata-download";
     pub const EJECT: &str = "strata-eject";
     pub const EYE: &str = "strata-eye";

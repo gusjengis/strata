@@ -35,7 +35,7 @@ fn sidebar_folder_customization_loads_and_updates_across_windows() {
             let cases = [
                 (location.clone(), icons::FOLDER),
                 (Location::local(&home), icons::HOME),
-                (Location::local(&downloads), icons::DOWNLOADS),
+                (Location::local(&downloads), icons::SIDEBAR_DOWNLOADS),
             ];
             crate::test_support::save_pins(&[(location.clone(), "Custom folder".into())]);
             let mut settings = String::from("[folder_colors]\n");
