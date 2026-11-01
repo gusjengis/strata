@@ -29,10 +29,11 @@ pub(super) struct Header {
     widget: gtk::HeaderBar,
     /// Sidebar-width lead of the toolbar and status bar, so the sidebar reads
     /// as one full-height pane beside them.
-    pub(super) sidebar_cap: gtk::Box,
-    /// Traffic lights; the tab strip borrows them while it tops the window.
-    pub(super) lights: gtk::Box,
+    sidebar_cap: gtk::Box,
     pub(super) footer_cap: gtk::Box,
+    /// Holds the window's tab strip while this tab is shown. Like Finder's tab
+    /// bar it sits under the toolbar, beside the sidebar, which keeps its place.
+    pub(super) tab_slot: gtk::Box,
     pub(super) actions: gtk::Box,
     pub(super) new_tab: gtk::Button,
     pub(super) content: gtk::Box,
@@ -148,6 +149,10 @@ impl Header {
         footer_cap.add_css_class("sidebar-cap");
         footer_cap.add_css_class("footer-cap");
         footer_cap.set_hexpand(false);
+        let tab_slot = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+        tab_slot.add_css_class("tab-slot");
+        tab_slot.set_valign(gtk::Align::Start);
+        tab_slot.set_visible(false);
         let navigation = history_capsule(browser);
         let views = view_switcher(browser, preferences);
         let appearance_divider = gtk::Separator::new(gtk::Orientation::Vertical);
@@ -187,8 +192,8 @@ impl Header {
         Self {
             widget,
             sidebar_cap,
-            lights,
             footer_cap,
+            tab_slot,
             content,
             sidebar_toggle,
             search,
@@ -438,6 +443,38 @@ fn bind_sidebar_cap(cap: &gtk::Box, content: &gtk::Paned) {
     }
 }
 
+/// Starts a widget where the sidebar ends, or at the edge when it is hidden.
+fn bind_sidebar_margin(widget: &gtk::Box, content: &gtk::Paned) {
+    let weak = widget.downgrade();
+    let update = move |content: &gtk::Paned| {
+        let Some(widget) = weak.upgrade() else {
+            return;
+        };
+        let visible = content
+            .start_child()
+            .is_some_and(|child| child.get_visible());
+        let margin = if visible {
+            content.position() + crate::ui::preview::separator_width(content)
+        } else {
+            0
+        };
+        if widget.margin_start() != margin.max(0) {
+            widget.set_margin_start(margin.max(0));
+        }
+    };
+    update(content);
+    let on_position = update.clone();
+    content.connect_position_notify(move |content| on_position(content));
+    if let Some(sidebar) = content.start_child() {
+        let content = content.downgrade();
+        sidebar.connect_visible_notify(move |_| {
+            if let Some(content) = content.upgrade() {
+                update(&content);
+            }
+        });
+    }
+}
+
 pub(super) fn header_action(icon: &str, tooltip: &str) -> gtk::Button {
     let button = gtk::Button::builder().tooltip_text(tooltip).build();
     button.set_child(Some(&assets::chrome_icon(icon)));
@@ -478,6 +515,7 @@ pub(super) fn browser_layout(
     );
     bind_sidebar_cap(&header.sidebar_cap, &content);
     bind_sidebar_cap(&header.footer_cap, &content);
+
     let preview_split = gtk::Paned::new(gtk::Orientation::Horizontal);
     preview_split.add_css_class("preview-split");
     // The column beside the divider keeps its resize edge; the preview grip moves it.
@@ -492,12 +530,29 @@ pub(super) fn browser_layout(
     preview_split.set_position(i32::MAX);
     preview_split.set_vexpand(true);
     preview.attach_split(&preview_split, &content, browser, Some(sidebar));
+    bind_sidebar_margin(&header.tab_slot, &content);
+    {
+        let split = preview_split.downgrade();
+        header.tab_slot.connect_visible_notify(move |slot| {
+            if let Some(split) = split.upgrade() {
+                if slot.is_visible() {
+                    split.add_css_class("with-tab-bar");
+                } else {
+                    split.remove_css_class("with-tab-bar");
+                }
+            }
+        });
+    }
     browser.add_marquee_origin(
         &preview.widget(),
         gtk::PackType::End,
         OriginClick::keeps_selection_within(&preview.pane_widget()),
     );
-    root.append(&preview_split);
+    let split_overlay = gtk::Overlay::new();
+    split_overlay.set_child(Some(&preview_split));
+    split_overlay.add_overlay(&header.tab_slot);
+    split_overlay.set_vexpand(true);
+    root.append(&split_overlay);
     root
 }
 

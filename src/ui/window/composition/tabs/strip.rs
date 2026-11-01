@@ -137,19 +137,16 @@ impl TabStrip {
         let widget = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         widget.add_css_class("tab-strip");
         let row = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+        // Finder's tabs share the bar's full width equally.
+        row.set_homogeneous(true);
+        row.set_hexpand(true);
         row.set_accessible_role(gtk::AccessibleRole::TabList);
         accessibility::set_label(&row, &crate::i18n::tr("Tabs"));
         let actions = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         actions.set_valign(gtk::Align::Center);
-        let flow = gtk::Box::new(gtk::Orientation::Horizontal, 0);
-        flow.append(&row);
-        flow.append(&actions);
-        let handle = gtk::WindowHandle::new();
-        handle.set_hexpand(true);
-        handle.set_child(Some(&gtk::Box::new(gtk::Orientation::Horizontal, 0)));
-        flow.append(&handle);
+        actions.add_css_class("tab-strip-actions");
         let overlay = gtk::Overlay::new();
-        overlay.set_child(Some(&flow));
+        overlay.set_child(Some(&row));
         let line = gtk::DrawingArea::new();
         line.set_can_target(false);
         line.add_css_class("tab-indicator");
@@ -161,17 +158,20 @@ impl TabStrip {
             .child(&overlay)
             .build();
         let content = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+        content.add_css_class("tab-track");
         content.set_hexpand(true);
+        content.set_valign(gtk::Align::Center);
         content.append(&scroller);
         widget.append(&content);
+        widget.append(&actions);
         let headers = Rc::new(RefCell::new(Vec::<Header>::new()));
         let indicator = Rc::new(Indicator::default());
         let insertion = Rc::new(Cell::new(None::<usize>));
         let drop_position = insertion.clone();
         let drop_headers = headers.clone();
-        let drawing = indicator.clone();
         line.set_draw_func(move |area, context, _, height| {
-            let (x, width) = drawing.position.get();
+            // Finder marks the active tab by its pill alone, so the line only
+            // draws the drop insertion mark.
             let color = area.color();
             context.set_source_rgba(
                 color.red() as f64,
@@ -179,8 +179,6 @@ impl TabStrip {
                 color.blue() as f64,
                 color.alpha() as f64,
             );
-            context.rectangle(x, height as f64 - 3.0, width, 3.0);
-            let _ = context.fill();
             if let Some(index) = drop_position.get() {
                 let headers = drop_headers.borrow();
                 let edge = headers
@@ -280,6 +278,9 @@ impl TabStrip {
         select.set_accessible_role(gtk::AccessibleRole::Tab);
         select.add_css_class("tab-select");
         let content = gtk::Box::new(gtk::Orientation::Horizontal, 6);
+        content.set_halign(gtk::Align::Center);
+        select.set_hexpand(true);
+        widget.set_hexpand(true);
         let label = gtk::Label::new(None);
         label.set_ellipsize(gtk::pango::EllipsizeMode::End);
         label.set_max_width_chars(22);
@@ -329,8 +330,13 @@ impl TabStrip {
         close.add_controller(close_hover);
         accessibility::set_label(&close, &crate::i18n::tr("Close tab"));
         close.add_css_class("tab-close");
-        widget.append(&select);
+        // Finder puts the close button at the leading edge; a matching gap at
+        // the end keeps the title centred in the tab.
+        let balance = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+        balance.add_css_class("tab-close-balance");
         widget.append(&close);
+        widget.append(&select);
+        widget.append(&balance);
         let hover = gtk::EventControllerMotion::new();
         hover.connect_contains_pointer_notify(move |hover| {
             let Some(widget) = hover.widget() else {

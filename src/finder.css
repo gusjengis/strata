@@ -45,13 +45,13 @@ window {
   border: none;
 }
 
-/* Glass edge light: brighter toward the window edges, fading inward. */
+/* Glass edge light: brighter toward the window edges, fading inward. The
+   bottom rim belongs to the footer cap at the window edge, so no line crosses
+   the panel where the status bar meets it. */
 .sidebar-shell {
   box-shadow:
     inset 1px 0 alpha(white, 0.16),
-    inset 0 -1px alpha(white, 0.08),
-    inset 24px 0 40px -24px alpha(white, 0.10),
-    inset 0 -24px 40px -24px alpha(white, 0.08);
+    inset 24px 0 40px -24px alpha(white, 0.10);
 }
 
 .sidebar-cap.over-sidebar {
@@ -62,17 +62,9 @@ window {
     inset 0 24px 40px -24px alpha(white, 0.10);
 }
 
-/* With tabs open the strip cap tops the sidebar, so it takes the top rim. */
-.sidebar-cap.over-sidebar.under-tabs {
-  box-shadow:
-    inset 1px 0 alpha(white, 0.16),
-    inset 24px 0 40px -24px alpha(white, 0.10);
-}
-
 .footer-cap.over-sidebar {
   box-shadow:
     inset 1px 0 alpha(white, 0.16),
-    inset 0 -1px alpha(white, 0.08),
     inset 24px 0 40px -24px alpha(white, 0.10);
 }
 
@@ -684,33 +676,129 @@ entry:focus-within {
   box-shadow: 0 0 0 3px alpha(@strata_accent, 0.5);
 }
 
-/* Tab strip: Finder's tab bar is a recessed track of equal tabs. */
-.tab-strip {
+/* Tab bar: under the toolbar, a full-width recessed track of equal tabs with
+   the active one set in as a darker pill, and a round + beside it. */
+.tab-slot {
   background: @finder_content;
-  box-shadow: inset 0 -1px alpha(white, 0.06);
-  min-height: 34px;
 }
 
-.browser-tab {
+/* The tab bar overlays the top of the content: 1 + 28 + 6 below. */
+.preview-split.with-tab-bar > .finder-content,
+.preview-split.with-tab-bar > .sidebar-split > .finder-content {
+  margin-top: 35px;
+}
+
+.tab-strip,
+.tab-strip:backdrop {
+  background: transparent;
+  box-shadow: none;
+  min-height: 0;
+  padding: 1px 8px 6px 7px;
+  border-spacing: 4px;
+}
+
+.tab-strip .tab-track {
+  background-color: alpha(white, 0.09);
+  border-radius: 9999px;
+  box-shadow: inset 0 0 0 1px alpha(white, 0.07);
+  min-height: 0;
+  padding: 2px;
+}
+
+.tab-strip scrolledwindow,
+.tab-strip viewport {
+  background: transparent;
+}
+
+.browser-tab,
+.browser-tab.hovered,
+.browser-tab.drag-hovered {
+  background: transparent;
+  border-radius: 9999px;
+  margin: 0 1px;
+  padding: 0;
+  min-height: 24px;
+  color: alpha(white, 0.45);
+}
+
+.browser-tab.hovered:not(.active),
+.browser-tab.drag-hovered:not(.active) {
   background: alpha(white, 0.04);
-  border-radius: 8px;
-  margin: 4px 2px;
-  color: @finder_secondary;
+  color: alpha(white, 0.62);
 }
 
 .browser-tab.active {
-  background: alpha(white, 0.12);
-  color: @finder_label;
+  background-color: alpha(black, 0.21);
+  background-image: linear-gradient(to bottom, alpha(white, 0.05), alpha(white, 0) 30%, alpha(white, 0) 70%, alpha(white, 0.05));
+  box-shadow:
+    inset 0 1px alpha(white, 0.17),
+    inset 0 -1px alpha(white, 0.16),
+    inset 0 0 0 1px alpha(white, 0.06);
+  color: alpha(white, 0.92);
 }
 
-.browser-tab.hovered:not(.active) {
-  background: alpha(white, 0.07);
-  color: @finder_label;
-}
-
-.tab-strip .tab-select {
-  font-weight: 500;
+.tab-strip .tab-select,
+.tab-strip .tab-select:hover,
+.tab-strip .tab-select:active {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  outline: none;
+  margin: 0;
+  min-height: 24px;
+  padding: 0 4px;
+  font-size: 11px;
+  font-weight: 600;
   opacity: 1;
+  color: inherit;
+}
+
+.tab-strip .tab-close {
+  border: none;
+  min-width: 16px;
+  min-height: 16px;
+  margin: 0 0 0 6px;
+  padding: 0;
+  border-radius: 9999px;
+  opacity: 0;
+}
+
+.browser-tab.hovered .tab-close {
+  opacity: 0.7;
+}
+
+.tab-strip .tab-close:hover:not(:disabled) {
+  background: alpha(white, 0.10);
+  opacity: 1;
+}
+
+.tab-close-balance {
+  min-width: 22px;
+}
+
+.tab-strip-actions button.header-action,
+.tab-strip button.header-action {
+  background-color: @finder_glass;
+  background-image: linear-gradient(to bottom, alpha(white, 0.05), alpha(white, 0) 45%);
+  border-radius: 9999px;
+  box-shadow:
+    inset 0 1px alpha(white, 0.16),
+    inset 0 -1px alpha(white, 0.10),
+    0 0 0 1px alpha(black, 0.55);
+  min-width: 28px;
+  min-height: 28px;
+  margin: 0;
+  padding: 0;
+  color: alpha(white, 0.92);
+}
+
+.tab-strip-actions button.header-action:hover {
+  background-color: alpha(white, 0.12);
+}
+
+.tab-strip .tab-key-hint {
+  font-size: 10px;
+  opacity: 0.7;
 }
 
 /* Sizes beside names read as plain secondary text. */

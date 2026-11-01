@@ -57,9 +57,6 @@ pub(in crate::ui::window) struct TabWindow {
     stack: gtk::Stack,
     drag_token: String,
     strip: TabStrip,
-    /// Sidebar-width lead of the tab strip, so tabs start where the sidebar
-    /// ends and the sidebar runs the window's full height.
-    strip_cap: gtk::Box,
     tabs: RefCell<Vec<Rc<Tab>>>,
     closed_tabs: RefCell<Vec<ClosedTab>>,
     active: Cell<u64>,
@@ -83,21 +80,9 @@ impl TabWindow {
         stack.set_vexpand(true);
         stack.set_transition_type(gtk::StackTransitionType::None);
         let strip = TabStrip::new();
-        let strip_cap = gtk::Box::new(gtk::Orientation::Horizontal, 0);
-        strip_cap.add_css_class("sidebar-cap");
-        strip_cap.add_css_class("over-sidebar");
-        strip_cap.add_css_class("strip-cap");
-        strip_cap.set_hexpand(false);
-        strip_cap.set_visible(false);
-        let strip_cap_handle = gtk::WindowHandle::new();
-        strip_cap_handle.set_child(Some(&strip_cap));
+        // The strip lives in the active tab's bar, under its toolbar.
         strip.widget().set_hexpand(true);
-        let strip_row = gtk::Box::new(gtk::Orientation::Horizontal, 0);
-        strip_row.add_css_class("tab-strip-row");
-        strip_row.append(&strip_cap_handle);
-        strip_row.append(strip.widget());
         let shell = gtk::Box::new(gtk::Orientation::Vertical, 0);
-        shell.append(&strip_row);
         shell.append(&stack);
         let overlay = gtk::Overlay::new();
         overlay.add_css_class("tab-window");
@@ -108,7 +93,6 @@ impl TabWindow {
             preferences: preferences.clone(),
             stack,
             strip,
-            strip_cap,
             tabs: RefCell::new(Vec::new()),
             closed_tabs: RefCell::new(Vec::new()),
             active: Cell::new(0),
@@ -307,17 +291,6 @@ impl TabWindow {
             }
         });
         self.tabs.borrow_mut().push(tab);
-        let cap = &content.header.sidebar_cap;
-        for property in ["width-request", "css-classes"] {
-            let weak = Rc::downgrade(self);
-            cap.connect_notify_local(Some(property), move |_, _| {
-                if let Some(state) = weak.upgrade()
-                    && state.active.get() == id
-                {
-                    state.refresh_strip_cap();
-                }
-            });
-        }
         self.strip.add(self, id, &content.browser);
         strip::install_new_tab_drop(self, &content.header.new_tab);
         let weak = Rc::downgrade(self);
@@ -481,6 +454,15 @@ impl TabWindow {
         self.strip.refresh_visibility();
         for tab in self.tabs.borrow().iter() {
             let header = &tab.content.header;
+            let shown = multiple && tab.id == self.active.get();
+            header.tab_slot.set_visible(shown);
+            if shown && self.strip.widget().parent().as_ref() != Some(header.tab_slot.upcast_ref())
+            {
+                if let Some(parent) = self.strip.widget().parent().and_downcast::<gtk::Box>() {
+                    parent.remove(self.strip.widget());
+                }
+                header.tab_slot.append(self.strip.widget());
+            }
             if let Some(parent) = header.new_tab.parent().and_downcast::<gtk::Box>() {
                 parent.remove(&header.new_tab);
             }
@@ -499,43 +481,6 @@ impl TabWindow {
             }
         }
         self.strip.hints(self.hints.get());
-        self.refresh_strip_cap();
-    }
-
-    /// Lines the strip up with the active tab's sidebar and lifts the traffic
-    /// lights into it, so they stay in the window's top-left corner.
-    fn refresh_strip_cap(&self) {
-        let multiple = self.tabs.borrow().len() > 1;
-        let active = self.active.get();
-        let mut cap_width = None;
-        for tab in self.tabs.borrow().iter() {
-            let header = &tab.content.header;
-            let lifted =
-                multiple && tab.id == active && header.sidebar_cap.has_css_class("over-sidebar");
-            let home: &gtk::Box = if lifted {
-                &self.strip_cap
-            } else {
-                &header.sidebar_cap
-            };
-            if header.lights.parent().as_ref() != Some(home.upcast_ref()) {
-                if let Some(parent) = header.lights.parent().and_downcast::<gtk::Box>() {
-                    parent.remove(&header.lights);
-                }
-                home.prepend(&header.lights);
-            }
-            if lifted {
-                header.sidebar_cap.add_css_class("under-tabs");
-                cap_width = Some(header.sidebar_cap.width_request());
-            } else {
-                header.sidebar_cap.remove_css_class("under-tabs");
-            }
-        }
-        self.strip_cap.set_visible(cap_width.is_some());
-        if let Some(width) = cap_width
-            && self.strip_cap.width_request() != width
-        {
-            self.strip_cap.set_width_request(width);
-        }
     }
 
     fn select_index(&self, index: usize) {
