@@ -68,13 +68,10 @@ pub fn special_folder_icon(path: &Path) -> Option<&'static str> {
             (Dir::Videos, &["folder-videos"][..]),
             (Dir::PublicShare, &["folder-publicshare"][..]),
         ];
-        let Some((_, names)) = special
+        special
             .into_iter()
-            .find(|(dir, _)| glib::user_special_dir(*dir).is_some_and(|dir| dir == path))
-        else {
-            return None;
-        };
-        names
+            .find(|(dir, _)| glib::user_special_dir(*dir).is_some_and(|dir| dir == path))?
+            .1
     };
     resolve_cached(&format!("path:{}", path.display()), || {
         first_theme_icon(candidates)
