@@ -62,6 +62,13 @@ window {
     inset 0 24px 40px -24px alpha(white, 0.10);
 }
 
+/* With tabs open the strip cap tops the sidebar, so it takes the top rim. */
+.sidebar-cap.over-sidebar.under-tabs {
+  box-shadow:
+    inset 1px 0 alpha(white, 0.16),
+    inset 24px 0 40px -24px alpha(white, 0.10);
+}
+
 .footer-cap.over-sidebar {
   box-shadow:
     inset 1px 0 alpha(white, 0.16),

@@ -29,7 +29,9 @@ pub(super) struct Header {
     widget: gtk::HeaderBar,
     /// Sidebar-width lead of the toolbar and status bar, so the sidebar reads
     /// as one full-height pane beside them.
-    sidebar_cap: gtk::Box,
+    pub(super) sidebar_cap: gtk::Box,
+    /// Traffic lights; the tab strip borrows them while it tops the window.
+    pub(super) lights: gtk::Box,
     pub(super) footer_cap: gtk::Box,
     pub(super) actions: gtk::Box,
     pub(super) new_tab: gtk::Button,
@@ -185,6 +187,7 @@ impl Header {
         Self {
             widget,
             sidebar_cap,
+            lights,
             footer_cap,
             content,
             sidebar_toggle,
