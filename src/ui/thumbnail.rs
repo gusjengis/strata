@@ -1308,7 +1308,23 @@ pub(super) fn show_fallback_icon(image: &ThumbnailSlot, icon: &str, size: i32) {
 /// A metadata fill can find that a bound folder needs administrator access; a
 /// folder the user customized keeps its icon, as a fresh bind would.
 pub(super) fn show_locked_folder(image: &ThumbnailSlot) {
-    use crate::assets::icons::FOLDER_LOCK;
+    replace_folder_icon(image, crate::assets::icons::FOLDER_LOCK);
+}
+
+/// A metadata fill can find that a bound plain folder holds something (or
+/// nothing), which Finder draws as a different folder icon.
+pub(super) fn show_folder_fill(image: &ThumbnailSlot, entry: &crate::model::FileEntry) {
+    if entry.is_locked_folder() {
+        return;
+    }
+    let icon = super::browser::entry_icon(entry);
+    if crate::assets::is_folder_icon(icon) && image.fallback_icon().as_deref() != Some(icon) {
+        replace_folder_icon(image, icon);
+    }
+}
+
+/// Swaps a plain-folder fallback for `icon`, unless the user customized it.
+fn replace_folder_icon(image: &ThumbnailSlot, icon: &str) {
     if !image
         .fallback_icon()
         .as_deref()
@@ -1320,7 +1336,7 @@ pub(super) fn show_locked_folder(image: &ThumbnailSlot) {
         match icons.get_mut(&(image.as_ptr() as usize)) {
             Some(tracked) if tracked.customized => true,
             Some(tracked) => {
-                tracked.icon = FOLDER_LOCK.to_owned();
+                tracked.icon = icon.to_owned();
                 false
             }
             None => false,
@@ -1331,12 +1347,12 @@ pub(super) fn show_locked_folder(image: &ThumbnailSlot) {
     }
     let (texture, _) = path_icon_texture(
         None,
-        FOLDER_LOCK,
+        icon,
         image.icon_pixel_size(),
         image.scale_factor(),
         image.icon_context(),
     );
-    image.set_fallback(FOLDER_LOCK, texture.as_ref());
+    image.set_fallback(icon, texture.as_ref());
 }
 
 pub(super) fn show_customized_icon(

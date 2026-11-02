@@ -54,6 +54,17 @@ impl Header {
         preview: &PreviewDrawer,
         preferences: &Rc<PreferenceManager>,
     ) -> Self {
+        // Finder dims its chrome while another window is active. GTK only
+        // sets :backdrop on a focus transition, so follow `is-active` directly.
+        let sync_inactive = |window: &gtk::ApplicationWindow| {
+            if window.is_active() {
+                window.remove_css_class("inactive");
+            } else {
+                window.add_css_class("inactive");
+            }
+        };
+        sync_inactive(window);
+        window.connect_is_active_notify(sync_inactive);
         let widget = gtk::HeaderBar::new();
         widget.add_css_class("browser-header");
         widget.set_show_title_buttons(false);
@@ -143,8 +154,10 @@ impl Header {
         let cap_spacer = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         cap_spacer.set_hexpand(true);
         sidebar_cap.append(&cap_spacer);
+        // Finder has no sidebar-mode button beside the traffic lights. The
+        // toggle stays unparented so its state, preference binding and
+        // keyboard shortcut keep working without a visible control.
         sidebar_toggle.set_valign(gtk::Align::Center);
-        sidebar_cap.append(&sidebar_toggle);
         let footer_cap = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         footer_cap.add_css_class("sidebar-cap");
         footer_cap.add_css_class("footer-cap");

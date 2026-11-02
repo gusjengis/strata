@@ -1583,7 +1583,7 @@ impl SidebarState {
                 }
                 let location = Location::local(home_directory());
                 let row = self.append_place(
-                    crate::assets::icons::HOME,
+                    crate::assets::icons::SIDEBAR_HOME,
                     &crate::i18n::tr("Home"),
                     location.clone(),
                 );
@@ -1604,7 +1604,7 @@ impl SidebarState {
                 }
                 let location = Location::uri("network:///");
                 let row = self.append_place(
-                    crate::assets::icons::GLOBE,
+                    crate::assets::icons::SIDEBAR_NETWORK,
                     &crate::i18n::tr("Network"),
                     location.clone(),
                 );
@@ -1783,7 +1783,7 @@ impl SidebarState {
             return None;
         }
         let ids = device_release::ids_for_mount(&mount);
-        let row = sidebar_button(crate::assets::icons::HARD_DRIVE, name);
+        let row = sidebar_button(drive_symbol(mount.drive().as_ref()), name);
         if let Some(id) = drive_dialogs::PropertiesTarget::Mount(mount.clone()).label_id() {
             device_labels::bind_row_label(&row, &self.preference_manager, &id, name);
         }
@@ -2059,7 +2059,10 @@ impl SidebarState {
 
     fn append_recent_place(self: &Rc<Self>) {
         let location = Location::uri("recent:///");
-        let row = sidebar_button(crate::assets::icons::CLOCK, &crate::i18n::tr("Recent"));
+        let row = sidebar_button(
+            crate::assets::icons::SIDEBAR_RECENTS,
+            &crate::i18n::tr("Recent"),
+        );
         crate::ui::accessibility::set_description(&row, Some("recent:///"));
         self.add_place_keycap(&row, super::keys::bindings::GO_RECENT);
         self.bind_place_row(&row, location.clone(), PlaceNavigation::Direct);
@@ -2072,7 +2075,10 @@ impl SidebarState {
 
     fn append_trash_place(self: &Rc<Self>) {
         let location = Location::uri("trash:///");
-        let row = sidebar_button(crate::assets::icons::TRASH, &crate::i18n::tr("Trash"));
+        let row = sidebar_button(
+            crate::assets::icons::SIDEBAR_TRASH,
+            &crate::i18n::tr("Trash"),
+        );
         crate::ui::accessibility::set_description(&row, Some("trash:///"));
         self.add_place_keycap(&row, super::keys::bindings::GO_TRASH);
         self.bind_place_row(&row, location, PlaceNavigation::Direct);
@@ -2404,7 +2410,7 @@ impl SidebarState {
 
     fn append_volume(self: &Rc<Self>, volume: gio::Volume) -> Option<device_release::DeviceIds> {
         let name = volume.name().to_string();
-        let row = sidebar_button(crate::assets::icons::HARD_DRIVE, &name);
+        let row = sidebar_button(drive_symbol(volume.drive().as_ref()), &name);
         if let Some(id) = drive_dialogs::PropertiesTarget::Volume(volume.clone()).label_id() {
             device_labels::bind_row_label(&row, &self.preference_manager, &id, &name);
         }
@@ -2520,14 +2526,17 @@ impl SidebarState {
     }
 
     fn append_release_ghost(&self, key: &device_release::ReleaseKey) {
-        let row = sidebar_button(crate::assets::icons::HARD_DRIVE, &key.display_name);
+        let row = sidebar_button(
+            crate::assets::icons::SIDEBAR_INTERNAL_DRIVE,
+            &key.display_name,
+        );
         self.append_sidebar_row(&device_release::pending_device_shell(&row));
     }
 
     fn append_password_drive(&self, drive: gio::Drive) -> Option<device_release::DeviceIds> {
         let ids = device_release::ids_for_drive(&drive);
         let name = drive.name().to_string();
-        let row = sidebar_button(crate::assets::icons::HARD_DRIVE, &name);
+        let row = sidebar_button(drive_symbol(Some(&drive)), &name);
         crate::ui::accessibility::set_description(&row, Some(&name));
         if device_release::is_pending(&ids) {
             self.append_sidebar_row(&device_release::pending_device_shell(&row));
@@ -2568,7 +2577,7 @@ impl SidebarState {
 
     fn append_smb_mount(self: &Rc<Self>, name: &str, location: Location, mount: gio::Mount) {
         let properties_location = location.clone();
-        let row = self.append_place(crate::assets::icons::NETWORK, name, location);
+        let row = self.append_place(crate::assets::icons::SIDEBAR_NETWORK, name, location);
         let menu = super::accessibility::menu_box();
         menu.add_css_class("folder-context-menu");
         let properties = sidebar_context_option(crate::assets::icons::INFO, "Properties", false);
@@ -2647,7 +2656,7 @@ impl SidebarState {
         name: &str,
         location: Location,
     ) -> gtk::Button {
-        let row = self.append_place(crate::assets::icons::FOLDER, name, location.clone());
+        let row = self.append_place(crate::assets::icons::SIDEBAR_FOLDER, name, location.clone());
         row.add_css_class("sidebar-pinned-row");
         self.make_pinned_row_reorderable(&row, index);
         let unpinned_location = location.clone();
@@ -4150,12 +4159,12 @@ fn standard_place(id: &str) -> Option<(&'static str, &'static str, glib::UserDir
             glib::UserDirectory::Downloads,
         )),
         "music" => Some((
-            crate::assets::icons::MUSIC,
+            crate::assets::icons::SIDEBAR_MUSIC,
             "Music",
             glib::UserDirectory::Music,
         )),
         "pictures" => Some((
-            crate::assets::icons::PICTURES,
+            crate::assets::icons::SIDEBAR_PICTURES,
             "Pictures",
             glib::UserDirectory::Pictures,
         )),
@@ -4235,9 +4244,38 @@ fn sync_keycap(keycap: &gtk::Label, visible: bool) {
     keycap.set_visible(visible);
 }
 
+/// Finder's symbol for a volume: drives that can be removed show the
+/// external-drive glyph, optical media the disc, the rest the internal one.
+fn drive_symbol(drive: Option<&gio::Drive>) -> &'static str {
+    use crate::assets::icons::{
+        SIDEBAR_EXTERNAL_DRIVE, SIDEBAR_INTERNAL_DRIVE, SIDEBAR_OPTICAL_DISC,
+    };
+    match drive {
+        Some(drive) if drive.is_media_removable() && drive.can_eject() => {
+            if drive
+                .identifier(gio::DRIVE_IDENTIFIER_KIND_UNIX_DEVICE)
+                .is_some_and(|device| device.starts_with("/dev/sr"))
+            {
+                SIDEBAR_OPTICAL_DISC
+            } else {
+                SIDEBAR_EXTERNAL_DRIVE
+            }
+        }
+        Some(drive) if drive.is_removable() => SIDEBAR_EXTERNAL_DRIVE,
+        _ => SIDEBAR_INTERNAL_DRIVE,
+    }
+}
+
 fn sidebar_button(icon: &str, name: &str) -> gtk::Button {
-    let content = gtk::Box::new(gtk::Orientation::Horizontal, 8);
-    let image = crate::assets::primary_icon(icon, 17);
+    let content = gtk::Box::new(gtk::Orientation::Horizontal, 6);
+    // Finder's sidebar symbols sit in a 24 px slot (see finder.css).
+    let size = if crate::assets::icons::is_sidebar_symbol(icon) {
+        24
+    } else {
+        17
+    };
+    let image = crate::assets::primary_icon(icon, size);
+    image.add_css_class("sidebar-icon");
     let label = gtk::Label::new(Some(name));
     label.set_xalign(0.0);
     label.set_hexpand(true);
@@ -4250,6 +4288,9 @@ fn sidebar_button(icon: &str, name: &str) -> gtk::Button {
         .halign(gtk::Align::Fill)
         .build();
     row.add_css_class("sidebar-row");
+    if crate::assets::icons::is_location_symbol(icon) {
+        row.add_css_class("sidebar-location");
+    }
     row.set_cursor_from_name(Some("pointer"));
     row.set_has_frame(false);
     row

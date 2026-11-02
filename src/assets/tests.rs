@@ -165,6 +165,8 @@ fn cold_interface_icons_render_when_decoder_workers_cannot_start() {
             let names = names
                 .iter()
                 .map(|resource| resource.strip_suffix(".svg").expect("bundled SVG icon"))
+                // Finder sidebar symbols are drawn by GTK from the icon name.
+                .filter(|name| !icons::is_sidebar_symbol(name))
                 .chain([icons::STRATA_LOGO]);
             for name in names {
                 let image = super::primary_icon(name, 18);

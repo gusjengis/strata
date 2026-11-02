@@ -2,6 +2,40 @@
 <gresources>
   <gresource prefix="/io/github/lgse/Strata">
     <file>brand/strata-logo-white.svg</file>
+    <file>traffic-lights/close-glyph.png</file>
+    <file>traffic-lights/close-glyph@2x.png</file>
+    <file>traffic-lights/close-inactive.png</file>
+    <file>traffic-lights/close-inactive@2x.png</file>
+    <file>traffic-lights/close.png</file>
+    <file>traffic-lights/close@2x.png</file>
+    <file>traffic-lights/minimize-glyph.png</file>
+    <file>traffic-lights/minimize-glyph@2x.png</file>
+    <file>traffic-lights/minimize-inactive.png</file>
+    <file>traffic-lights/minimize-inactive@2x.png</file>
+    <file>traffic-lights/minimize.png</file>
+    <file>traffic-lights/minimize@2x.png</file>
+    <file>traffic-lights/zoom-glyph.png</file>
+    <file>traffic-lights/zoom-glyph@2x.png</file>
+    <file>traffic-lights/zoom-inactive.png</file>
+    <file>traffic-lights/zoom-inactive@2x.png</file>
+    <file>traffic-lights/zoom.png</file>
+    <file>traffic-lights/zoom@2x.png</file>
+    <file>icons/scalable/actions/strata-sf-airdrop-symbolic.svg</file>
+    <file>icons/scalable/actions/strata-sf-arrow-down-circle-symbolic.svg</file>
+    <file>icons/scalable/actions/strata-sf-clock-symbolic.svg</file>
+    <file>icons/scalable/actions/strata-sf-document-symbolic.svg</file>
+    <file>icons/scalable/actions/strata-sf-externaldrive-symbolic.svg</file>
+    <file>icons/scalable/actions/strata-sf-film-symbolic.svg</file>
+    <file>icons/scalable/actions/strata-sf-folder-symbolic.svg</file>
+    <file>icons/scalable/actions/strata-sf-house-symbolic.svg</file>
+    <file>icons/scalable/actions/strata-sf-icloud-symbolic.svg</file>
+    <file>icons/scalable/actions/strata-sf-internaldrive-symbolic.svg</file>
+    <file>icons/scalable/actions/strata-sf-menubar-dock-rectangle-symbolic.svg</file>
+    <file>icons/scalable/actions/strata-sf-music-symbolic.svg</file>
+    <file>icons/scalable/actions/strata-sf-network-symbolic.svg</file>
+    <file>icons/scalable/actions/strata-sf-opticaldisc-symbolic.svg</file>
+    <file>icons/scalable/actions/strata-sf-photo-symbolic.svg</file>
+    <file>icons/scalable/actions/strata-sf-trash-symbolic.svg</file>
     <file>icons/scalable/actions/strata-arrow-down.svg</file>
     <file>icons/scalable/actions/strata-arrow-down-wide-narrow.svg</file>
     <file>icons/scalable/actions/strata-arrow-left.svg</file>

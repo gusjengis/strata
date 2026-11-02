@@ -1030,6 +1030,8 @@ pub(super) fn column_rows(
             entry.as_ref().and_then(|e| e.location.native_path()),
         );
         let show_sizes = crate::ui::preferences::PreferenceManager::shared().columns_show_sizes();
+        // A folder's icon shows whether it holds anything once its children are counted.
+        let counts_children = show_sizes || crate::assets::native::full_folder_icon().is_some();
         if let Some(entry) = entry.as_ref() {
             let mode_active = state
                 .as_ref()
@@ -1061,7 +1063,7 @@ pub(super) fn column_rows(
                 && !scrolling_for_bind.get()
                 && let Some(state) = state.as_ref()
                 && let Some(position) = source_position
-                && (metadata_needs_fill(entry) || (show_sizes && entry.is_directory()))
+                && (metadata_needs_fill(entry) || (counts_children && entry.is_directory()))
             {
                 crate::ui::thumbnail::request_metadata(
                     &icon,
@@ -1070,7 +1072,7 @@ pub(super) fn column_rows(
                     depth,
                     position,
                     entry.location.clone(),
-                    show_sizes && entry.is_directory(),
+                    counts_children && entry.is_directory(),
                 );
             }
         } else {

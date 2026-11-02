@@ -194,6 +194,19 @@ pub(in crate::ui) fn follow_sidebar(cap: &gtk::Box) {
             shape: None,
             clear_width: -1,
         }));
+        // Finder drops the glass while its window is inactive and the sidebar
+        // turns flat; GTK repaints on the focus change, which commits the shape.
+        {
+            let state = realized.clone();
+            let weak_cap = weak_cap.clone();
+            window.connect_is_active_notify(move |window| {
+                if let (Some(cap), Some(glass)) = (weak_cap.upgrade(), state.borrow_mut().as_mut())
+                {
+                    update(glass, &cap, window);
+                }
+                window.queue_draw();
+            });
+        }
         let Some(clock) = window.frame_clock() else {
             return;
         };
@@ -221,8 +234,16 @@ pub(in crate::ui) fn follow_sidebar(cap: &gtk::Box) {
 }
 
 fn update(glass: &mut SidebarGlass, cap: &gtk::Box, window: &gtk::Window) {
-    let column = cap
-        .has_css_class("over-sidebar")
+    let active = window.is_active();
+    if active != window.has_css_class(GLASS_CLASS) {
+        tracing::debug!(active, "compositor glass follows window focus");
+        if active {
+            window.add_css_class(GLASS_CLASS);
+        } else {
+            window.remove_css_class(GLASS_CLASS);
+        }
+    }
+    let column = (active && cap.has_css_class("over-sidebar"))
         .then(|| cap.compute_bounds(window))
         .flatten()
         .filter(|bounds| bounds.width() > 0.0);

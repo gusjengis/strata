@@ -6117,6 +6117,9 @@ fn update_bound_list_metadata(pane: &Pane, updates: &[(usize, FileEntry)]) {
             let Some((icon, name, _, mode, size, _, modified)) = list_row_parts(&row) else {
                 return true;
             };
+            if entry.is_directory() {
+                super::thumbnail::show_folder_fill(&icon, entry);
+            }
             if entry.is_locked_folder() {
                 super::thumbnail::show_locked_folder(&icon);
                 super::accessibility::describe_entry(&item, &name.label(), Some(entry));
@@ -6152,6 +6155,11 @@ fn update_bound_icons_metadata(pane: &Pane, updates: &[(usize, FileEntry)]) {
             let Some(card) = card.downcast::<gtk::Box>().ok() else {
                 return true;
             };
+            if entry.is_directory()
+                && let Some((icon, _)) = super::icons_cell::parts(&card)
+            {
+                super::thumbnail::show_folder_fill(&icon, entry);
+            }
             if entry.is_locked_folder() {
                 if let Some((icon, _)) = super::icons_cell::parts(&card) {
                     super::thumbnail::show_locked_folder(&icon);

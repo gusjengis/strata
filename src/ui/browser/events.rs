@@ -238,6 +238,13 @@ impl ViewState {
                             if let Some(position) = position
                                 && let Some(&entry) = filled.get(&position)
                             {
+                                if entry.is_directory()
+                                    && let Some(icon) =
+                                        row.first_child()
+                                            .and_downcast::<crate::ui::thumbnail::ThumbnailSlot>()
+                                {
+                                    crate::ui::thumbnail::show_folder_fill(&icon, entry);
+                                }
                                 if entry.is_locked_folder() {
                                     if let Some(icon) =
                                         row.first_child()

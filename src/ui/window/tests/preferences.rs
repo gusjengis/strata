@@ -33,8 +33,8 @@ fn sidebar_folder_customization_loads_and_updates_across_windows() {
                 Some(downloads.clone())
             );
             let cases = [
-                (location.clone(), icons::FOLDER),
-                (Location::local(&home), icons::HOME),
+                (location.clone(), icons::SIDEBAR_FOLDER),
+                (Location::local(&home), icons::SIDEBAR_HOME),
                 (Location::local(&downloads), icons::SIDEBAR_DOWNLOADS),
             ];
             crate::test_support::save_pins(&[(location.clone(), "Custom folder".into())]);
@@ -123,10 +123,15 @@ fn sidebar_folder_customization_loads_and_updates_across_windows() {
                         .expect("emoji folder"),
                 );
                 manager.clear_item_customization(path);
-                assert_icons(
-                    location,
-                    assets::primary_icon_paintable(fallback).expect("default folder"),
-                );
+                // Finder's sidebar symbols draw by icon name so CSS can color them.
+                for state in &sidebars {
+                    let image = sidebar_image(state, location);
+                    assert_eq!(image.icon_name().as_deref(), Some(*fallback));
+                    assert!(
+                        icons::is_sidebar_symbol(fallback),
+                        "sidebar places use Finder symbols"
+                    );
+                }
                 manager.set_folder_color(path, Some(FolderColorValue::Custom("#123456".into())));
                 assert_icons(
                     location,

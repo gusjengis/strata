@@ -39,11 +39,45 @@ pub mod icons {
     pub const DISC: &str = "strata-disc";
     pub const DOCUMENTS: &str = "strata-file-text";
     pub const ELLIPSIS: &str = "strata-ellipsis";
-    // Finder's sidebar glyphs for the standard places.
-    pub const SIDEBAR_DESKTOP: &str = "strata-panel-bottom";
-    pub const SIDEBAR_DOCUMENTS: &str = "strata-file";
-    pub const SIDEBAR_DOWNLOADS: &str = "strata-circle-arrow-down";
-    pub const SIDEBAR_MOVIES: &str = "strata-film";
+    // Finder's sidebar SF Symbols, extracted from macOS. Symbolic, so CSS
+    // colors them per sidebar section and window focus.
+    pub const SIDEBAR_DESKTOP: &str = "strata-sf-menubar-dock-rectangle-symbolic";
+    pub const SIDEBAR_DOCUMENTS: &str = "strata-sf-document-symbolic";
+    pub const SIDEBAR_DOWNLOADS: &str = "strata-sf-arrow-down-circle-symbolic";
+    pub const SIDEBAR_MOVIES: &str = "strata-sf-film-symbolic";
+    pub const SIDEBAR_MUSIC: &str = "strata-sf-music-symbolic";
+    pub const SIDEBAR_PICTURES: &str = "strata-sf-photo-symbolic";
+    pub const SIDEBAR_RECENTS: &str = "strata-sf-clock-symbolic";
+    pub const SIDEBAR_FOLDER: &str = "strata-sf-folder-symbolic";
+    pub const SIDEBAR_HOME: &str = "strata-sf-house-symbolic";
+    pub const SIDEBAR_TRASH: &str = "strata-sf-trash-symbolic";
+    pub const SIDEBAR_NETWORK: &str = "strata-sf-network-symbolic";
+    pub const SIDEBAR_INTERNAL_DRIVE: &str = "strata-sf-internaldrive-symbolic";
+    pub const SIDEBAR_EXTERNAL_DRIVE: &str = "strata-sf-externaldrive-symbolic";
+    pub const SIDEBAR_OPTICAL_DISC: &str = "strata-sf-opticaldisc-symbolic";
+    pub const SIDEBAR_CLOUD: &str = "strata-sf-icloud-symbolic";
+    pub const SIDEBAR_AIRDROP: &str = "strata-sf-airdrop-symbolic";
+
+    /// Finder sidebar symbols draw in their CSS color, not as a tinted texture.
+    pub fn is_sidebar_symbol(name: &str) -> bool {
+        name.starts_with("strata-sf-")
+    }
+
+    /// Finder grays the Locations section (volumes, home, network, trash)
+    /// and tints Favorites with the accent.
+    pub fn is_location_symbol(name: &str) -> bool {
+        matches!(
+            name,
+            SIDEBAR_HOME
+                | SIDEBAR_TRASH
+                | SIDEBAR_NETWORK
+                | SIDEBAR_INTERNAL_DRIVE
+                | SIDEBAR_EXTERNAL_DRIVE
+                | SIDEBAR_OPTICAL_DISC
+                | SIDEBAR_CLOUD
+                | SIDEBAR_AIRDROP
+        )
+    }
     pub const DOWNLOADS: &str = "strata-download";
     pub const EJECT: &str = "strata-eject";
     pub const EYE: &str = "strata-eye";
@@ -293,7 +327,9 @@ pub fn prepare() -> Result<(), Box<dyn std::error::Error>> {
 
 /// Whether `name` draws a plain folder, in either icon style.
 pub fn is_folder_icon(name: &str) -> bool {
-    name == icons::FOLDER || native::folder_icon() == Some(name)
+    name == icons::FOLDER
+        || native::folder_icon() == Some(name)
+        || native::full_folder_icon() == Some(name)
 }
 
 fn texture_scale(texture_px: i32, logical_px: i32) -> i32 {
@@ -419,6 +455,13 @@ pub fn use_bundled_spin_icons(root: &impl IsA<gtk::Widget>) {
 }
 
 pub fn set_primary_icon(image: &gtk::Image, name: &str) {
+    if icons::is_sidebar_symbol(name) {
+        // GTK recolors the symbolic SVG from the widget's CSS color, so the
+        // sidebar can tint it per section and dim it with the window.
+        remove_primary_icon(image);
+        image.set_icon_name(Some(name));
+        return;
+    }
     // Toolbar glyphs are monochrome like the window's labels.
     if image.has_css_class("chrome-icon") {
         let color = TEXT_ICON_COLOR.with(|color| color.borrow().clone());

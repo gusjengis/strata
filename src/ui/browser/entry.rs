@@ -101,11 +101,20 @@ pub(in crate::ui) fn entry_icon(entry: &FileEntry) -> &'static str {
         return crate::assets::icons::FOLDER_LOCK;
     }
     if entry.is_directory() {
-        return entry
+        if let Some(special) = entry
             .location
             .native_path()
             .and_then(crate::assets::native::special_folder_icon)
-            .unwrap_or_else(folder_icon);
+        {
+            return special;
+        }
+        // Finder shows papers in a folder that holds something.
+        if matches!(entry.child_count, MetadataValue::Known(count) if count > 0)
+            && let Some(full) = crate::assets::native::full_folder_icon()
+        {
+            return full;
+        }
+        return folder_icon();
     }
     icon_for_name(&entry.display_name)
 }

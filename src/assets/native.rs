@@ -50,6 +50,17 @@ pub fn folder_icon() -> Option<&'static str> {
     })
 }
 
+/// Finder's folder with papers showing, for a folder that holds something;
+/// `None` when the theme lacks one.
+pub fn full_folder_icon() -> Option<&'static str> {
+    if !enabled() {
+        return None;
+    }
+    resolve_cached("inode/directory:full", || {
+        first_theme_icon(&["folder-full"])
+    })
+}
+
 /// Desktop, Documents, Downloads and the other well-known folders.
 pub fn special_folder_icon(path: &Path) -> Option<&'static str> {
     if !enabled() {
