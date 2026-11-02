@@ -9,6 +9,7 @@ mod chooser;
 mod close_guard;
 mod collection_edit;
 mod collection_interaction;
+mod compositor_glass;
 mod controls;
 mod decoration;
 mod desktop_integration;

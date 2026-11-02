@@ -515,6 +515,7 @@ pub(super) fn browser_layout(
     );
     bind_sidebar_cap(&header.sidebar_cap, &content);
     bind_sidebar_cap(&header.footer_cap, &content);
+    crate::ui::compositor_glass::follow_sidebar(&header.sidebar_cap);
 
     let preview_split = gtk::Paned::new(gtk::Orientation::Horizontal);
     preview_split.add_css_class("preview-split");

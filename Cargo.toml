@@ -29,7 +29,7 @@ fontconfig-sys = { package = "yeslogic-fontconfig-sys", version = "6.0.1" }
 futures-channel = "0.3.31"
 futures-lite = "2.6.1"
 gdk-pixbuf = "0.22.0"
-gdk4-wayland = { version = "0.11.4", features = ["v4_12"] }
+gdk4-wayland = { version = "0.11.4", features = ["v4_12", "wayland_crate"] }
 gdk4-x11 = { version = "0.11.4", features = ["v4_10"] }
 gio = { version = "0.22.9", features = ["v2_72"] }
 gio-unix = "0.22.8"
@@ -79,6 +79,9 @@ x11rb = { version = "0.13.2", default-features = false, features = ["xkb", "xtes
 regex = { version = "1.13.1", optional = true }
 frizbee = "0.13"
 fitparser = "0.11.0"
+wayland-backend = { version = "0.3.11", features = ["client_system"] }
+wayland-client = "0.31.11"
+wayland-scanner = "0.31.7"
 
 [dev-dependencies]
 rustls = { version = "0.23.46", default-features = false, features = ["std", "ring", "tls12"] }

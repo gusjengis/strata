@@ -39,6 +39,9 @@ const SKIN_STYLE_PRIORITY: u32 = TOKEN_STYLE_PRIORITY + 1;
 const SKIN_CSS: &str = include_str!("../finder.css");
 /// Above the token and roundness styles so the uncomposited fallback wins over them.
 const UNCOMPOSITED_STYLE_PRIORITY: u32 = SKIN_STYLE_PRIORITY + 1;
+/// The compositor glass window background must beat the skin's opaque body;
+/// it is only installed when compositing, so it never meets the fallback.
+pub(in crate::ui) const COMPOSITOR_GLASS_STYLE_PRIORITY: u32 = UNCOMPOSITED_STYLE_PRIORITY;
 /// Above every Strata stylesheet, so `~/.config/strata/style.css` has the final word.
 const USER_STYLE_PRIORITY: u32 = UNCOMPOSITED_STYLE_PRIORITY + 1;
 const USER_STYLE_FILE: &str = "style.css";

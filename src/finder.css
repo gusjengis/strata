@@ -73,6 +73,16 @@ window {
   background: alpha(black, 0.35);
 }
 
+/* Compositor glass (src/ui/compositor_glass.rs): the compositor draws Finder's
+   sidebar material behind the window, so the column stays clear. */
+window.compositor-glass .sidebar-shell,
+window.compositor-glass .sidebar-split > .sidebar-shell,
+window.compositor-glass .sidebar-cap.over-sidebar,
+window.compositor-glass .sidebar-split > separator.wide {
+  background: transparent;
+  box-shadow: none;
+}
+
 .finder-header-row {
   min-height: 52px;
 }
